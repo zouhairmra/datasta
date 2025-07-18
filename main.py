@@ -37,8 +37,7 @@ authenticator = stauth.Authenticate(
 )
 
 # Login block
-name, authentication_status, username = authenticator.login('Login', 'main')
-
+name, authentication_status, username = authenticator.login('Login', location='main')
 # App logic
 if authentication_status:
     authenticator.logout('Logout', 'sidebar')
