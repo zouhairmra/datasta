@@ -1,10 +1,8 @@
 import streamlit as st
 import streamlit_authenticator as stauth
 
-# Page configuration
 st.set_page_config(page_title="DataStatPro", layout="wide")
 
-# User credentials with pre-hashed passwords
 config = {
     'credentials': {
         'usernames': {
@@ -28,21 +26,19 @@ config = {
     }
 }
 
-# Initialize authenticator
 authenticator = stauth.Authenticate(
     config['credentials'],
     config['cookie']['name'],
     config['cookie']['key'],
-    config['cookie']['expiry_days'],
+    config['cookie']['expiry_days']
 )
 
-# Login call - keyword argument for location
-name, authentication_status, username = authenticator.login('Login', location='main')
+# Call login() without arguments
+name, authentication_status, username = authenticator.login()
 
 if authentication_status:
     authenticator.logout('Logout', 'sidebar')
     st.title(f"📊 Welcome, {name}!")
-
     st.markdown("""
     **DataStatPro** helps you upload, explore, and analyze economic & financial data easily.
 
