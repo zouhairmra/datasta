@@ -1,0 +1,12 @@
+streamlit
+pandas
+numpy
+matplotlib
+seaborn
+scikit-learn
+statsmodels
+openpyxl
+plotly
+streamlit-authenticator
+PyYAML
+bcrypt
