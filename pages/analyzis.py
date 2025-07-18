@@ -1,16 +1,31 @@
 import pandas as pd
-import wbdata
-import datetime
+import requests
 import os
 import altair as alt
+import streamlit as st
 
-# Get World Bank data for a given indicator
+# Get World Bank data via API
 def get_world_bank_data(indicator, countries=["USA", "FRA", "QAT"], start_year=2000, end_year=2022):
-    dates = (datetime.datetime(start_year, 1, 1), datetime.datetime(end_year, 1, 1))
-    df = wbdata.get_dataframe({indicator: 'value'}, country=countries, data_date=dates, convert_date=True)
-    df.reset_index(inplace=True)
-    df = df.rename(columns={'value': indicator})
-    return df
+    all_data = []
+
+    for country in countries:
+        url = (
+            f"https://api.worldbank.org/v2/country/{country}/indicator/{indicator}"
+            f"?date={start_year}:{end_year}&format=json&per_page=10000"
+        )
+        response = requests.get(url)
+        if response.status_code != 200 or not response.json()[1]:
+            continue
+        records = response.json()[1]
+        for entry in records:
+            if entry["value"] is not None:
+                all_data.append({
+                    "country": entry["country"]["value"],
+                    "date": int(entry["date"]),
+                    indicator: entry["value"]
+                })
+
+    return pd.DataFrame(all_data)
 
 # Save uploaded data
 def save_user_data(dataframe, user_folder, filename="uploaded_data.csv"):
@@ -19,12 +34,33 @@ def save_user_data(dataframe, user_folder, filename="uploaded_data.csv"):
     dataframe.to_csv(full_path, index=False)
     return full_path
 
-# Create simple time series chart
+# Create time series chart
 def plot_indicator(df, indicator):
     chart = alt.Chart(df).mark_line().encode(
-        x='date:T',
+        x='date:O',
         y=indicator,
-        color='country'
+        color='country:N'
     ).properties(width=700, height=400)
     return chart
 
+# Streamlit interface
+st.title("📈 World Bank Indicator Analysis")
+
+indicator = st.selectbox("Select Indicator", {
+    "GDP per capita (current US$)": "NY.GDP.PCAP.CD",
+    "CO2 emissions (metric tons per capita)": "EN.ATM.CO2E.PC",
+    "Life expectancy": "SP.DYN.LE00.IN",
+    "Population": "SP.POP.TOTL"
+})
+
+countries = st.multiselect("Select Countries", ["USA", "FRA", "QAT", "DEU", "CHN", "IND", "BRA", "ZAF"], default=["USA", "FRA", "QAT"])
+start_year = st.slider("Start Year", 1960, 2022, 2000)
+end_year = st.slider("End Year", 1960, 2023, 2022)
+
+if st.button("Fetch Data"):
+    df = get_world_bank_data(indicator, countries, start_year, end_year)
+    if not df.empty:
+        st.write(df)
+        st.altair_chart(plot_indicator(df, indicator))
+    else:
+        st.warning("No data found for the selected parameters.")
