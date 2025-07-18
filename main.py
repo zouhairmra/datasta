@@ -1,3 +1,11 @@
+from utils import get_world_bank_data, plot_indicator
+
+# Example usage:
+df = get_world_bank_data('NY.GDP.PCAP.CD', countries=["USA", "QAT"])
+st.dataframe(df)
+
+chart = plot_indicator(df, 'NY.GDP.PCAP.CD')
+st.altair_chart(chart)
 import streamlit as st
 import bcrypt
 
@@ -51,11 +59,4 @@ else:
     - 📉 Forecast with Time Series & Machine Learning
     - 🌍 Connect to World Bank datasets
     """)
-from utils import get_world_bank_data, plot_indicator
 
-# Example usage:
-df = get_world_bank_data('NY.GDP.PCAP.CD', countries=["USA", "QAT"])
-st.dataframe(df)
-
-chart = plot_indicator(df, 'NY.GDP.PCAP.CD')
-st.altair_chart(chart)
