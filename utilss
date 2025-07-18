@@ -1,0 +1,31 @@
+# utils.py
+
+import pandas as pd
+import wbdata
+import datetime
+import os
+import altair as alt
+
+# Get World Bank data for a given indicator
+def get_world_bank_data(indicator, countries=["USA", "FRA", "QAT"], start_year=2000, end_year=2022):
+    dates = (datetime.datetime(start_year, 1, 1), datetime.datetime(end_year, 1, 1))
+    df = wbdata.get_dataframe({indicator: 'value'}, country=countries, data_date=dates, convert_date=True)
+    df.reset_index(inplace=True)
+    df = df.rename(columns={'value': indicator})
+    return df
+
+# Save uploaded data
+def save_user_data(dataframe, user_folder, filename="uploaded_data.csv"):
+    os.makedirs(user_folder, exist_ok=True)
+    full_path = os.path.join(user_folder, filename)
+    dataframe.to_csv(full_path, index=False)
+    return full_path
+
+# Create simple time series chart
+def plot_indicator(df, indicator):
+    chart = alt.Chart(df).mark_line().encode(
+        x='date:T',
+        y=indicator,
+        color='country'
+    ).properties(width=700, height=400)
+    return chart
