@@ -36,11 +36,17 @@ authenticator = stauth.Authenticate(
     config['cookie']['expiry_days']
 )
 
-# Login block
-name, authentication_status, username = authenticator.login('Login', location='main')
+# Show login form
+authenticator.login()
+
+# Fetch credentials
+name = authenticator.credentials.get("name")
+authentication_status = authenticator.authentication_status
+username = authenticator.username
+
 # App logic
 if authentication_status:
-    authenticator.logout('Logout', 'sidebar')
+    authenticator.logout("Logout", "sidebar")
     st.title(f"📊 Welcome, {name}!")
 
     st.markdown("""
@@ -54,6 +60,6 @@ if authentication_status:
     - 🌍 Connect to World Bank datasets
     """)
 elif authentication_status is False:
-    st.error('Incorrect username or password')
+    st.error("❌ Incorrect username or password")
 elif authentication_status is None:
-    st.warning('Please enter your username and password')
+    st.warning("🕵️ Please enter your username and password")
