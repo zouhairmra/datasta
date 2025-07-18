@@ -1,8 +1,10 @@
 import streamlit as st
 import streamlit_authenticator as stauth
 
+# Page configuration
 st.set_page_config(page_title="DataStatPro", layout="wide")
 
+# User credentials with pre-hashed passwords
 config = {
     'credentials': {
         'usernames': {
@@ -26,14 +28,15 @@ config = {
     }
 }
 
+# Initialize authenticator
 authenticator = stauth.Authenticate(
     config['credentials'],
     config['cookie']['name'],
     config['cookie']['key'],
-    config['cookie']['expiry_days']
+    config['cookie']['expiry_days'],
 )
 
-# Perform login
+# Login call - keyword argument for location
 name, authentication_status, username = authenticator.login('Login', location='main')
 
 if authentication_status:
@@ -52,5 +55,5 @@ if authentication_status:
     """)
 elif authentication_status is False:
     st.error('❌ Incorrect username or password')
-elif authentication_status is None:
+else:
     st.warning('🕵️ Please enter your username and password')
