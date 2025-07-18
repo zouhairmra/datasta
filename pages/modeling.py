@@ -1,41 +1,40 @@
-# Placeholder fimport streamlit as st
+import streamlit as st
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import scipy.stats as stats
-import io
 
-# Page setup
-st.set_page_config(page_title="Modeling & Analysis", layout="wide")
+# Page title
+st.set_page_config(page_title="Modeling", layout="wide")
 st.title("📊 Modeling & Statistical Analysis")
 
-# Sidebar for component navigation
+# Sidebar - file uploader and analysis options
+st.sidebar.subheader("Upload Data")
+uploaded_file = st.sidebar.file_uploader("Upload CSV", type=["csv"])
+
 analysis_type = st.sidebar.radio(
-    "Select analysis type:",
-    ["Descriptive Statistics", "Inferential Statistics", "Correlation Analysis", "Data Visualization"]
+    "Select Analysis Type",
+    ("Descriptive Statistics", "Inferential Statistics", "Correlation Analysis", "Data Visualization")
 )
 
-# File uploader
-st.sidebar.subheader("📁 Upload CSV")
-uploaded_file = st.sidebar.file_uploader("Upload your data file", type=["csv"])
-
-if uploaded_file:
+# If a file is uploaded
+if uploaded_file is not None:
     df = pd.read_csv(uploaded_file)
-    st.subheader("📄 Dataset Preview")
+    st.subheader("Data Preview")
     st.dataframe(df.head())
 
     numeric_cols = df.select_dtypes(include='number').columns.tolist()
 
     if analysis_type == "Descriptive Statistics":
-        st.header("📌 Descriptive Statistics")
+        st.header("Descriptive Statistics")
         st.write(df.describe())
 
     elif analysis_type == "Inferential Statistics":
-        st.header("🔍 Inferential Statistics (T-Test)")
+        st.header("Inferential Statistics (T-Test)")
         if len(numeric_cols) >= 2:
-            col1 = st.selectbox("Select first variable", numeric_cols)
-            col2 = st.selectbox("Select second variable", [col for col in numeric_cols if col != col1])
-            test_type = st.radio("Test type", ["Independent t-test", "Paired t-test"])
+            col1 = st.selectbox("Select First Variable", numeric_cols)
+            col2 = st.selectbox("Select Second Variable", [col for col in numeric_cols if col != col1])
+            test_type = st.radio("Test Type", ["Independent t-test", "Paired t-test"])
             if st.button("Run T-Test"):
                 try:
                     if test_type == "Independent t-test":
@@ -45,40 +44,39 @@ if uploaded_file:
                     st.write(f"**T-statistic:** {stat:.4f}")
                     st.write(f"**P-value:** {p:.4f}")
                     if p < 0.05:
-                        st.success("Result is statistically significant (p < 0.05).")
+                        st.success("Statistically significant (p < 0.05).")
                     else:
-                        st.info("Result is not statistically significant (p ≥ 0.05).")
+                        st.info("Not statistically significant (p ≥ 0.05).")
                 except Exception as e:
                     st.error(f"Error: {str(e)}")
         else:
-            st.warning("Need at least two numerical columns.")
+            st.warning("At least two numeric columns are required.")
 
     elif analysis_type == "Correlation Analysis":
-        st.header("📈 Correlation Matrix")
+        st.header("Correlation Analysis")
         if len(numeric_cols) >= 2:
-            corr = df[numeric_cols].corr()
+            corr_matrix = df[numeric_cols].corr()
             fig, ax = plt.subplots(figsize=(10, 6))
-            sns.heatmap(corr, annot=True, cmap='coolwarm', fmt=".2f", ax=ax)
+            sns.heatmap(corr_matrix, annot=True, cmap="coolwarm", fmt=".2f", ax=ax)
             st.pyplot(fig)
         else:
-            st.warning("Need at least two numerical columns.")
+            st.warning("Need at least two numeric columns.")
 
     elif analysis_type == "Data Visualization":
-        st.header("📊 Custom Visualizations")
-
-        chart_type = st.selectbox("Choose chart type", ["Histogram", "Boxplot", "Scatterplot", "Lineplot"])
+        st.header("Data Visualization")
+        chart_type = st.selectbox("Choose Chart Type", ["Histogram", "Boxplot", "Scatterplot", "Lineplot"])
 
         if chart_type == "Histogram":
-            column = st.selectbox("Select variable for histogram", numeric_cols)
-            bins = st.slider("Number of bins", 5, 100, 20)
+            col = st.selectbox("Select Variable", numeric_cols)
+            bins = st.slider("Number of Bins", 5, 100, 20)
             fig, ax = plt.subplots()
-            sns.histplot(df[column], bins=bins, kde=True, ax=ax)
+            sns.histplot(df[col], bins=bins, kde=True, ax=ax)
             st.pyplot(fig)
 
         elif chart_type == "Boxplot":
-            column = st.selectbox("Select variable for boxplot", numeric_cols)
+            col = st.selectbox("Select Variable", numeric_cols)
             fig, ax = plt.subplots()
-            sns.boxplot(x=df[column], ax=ax)
+            sns.boxplot(x=df[col], ax=ax)
             st.pyplot(fig)
 
         elif chart_type == "Scatterplot":
@@ -89,12 +87,11 @@ if uploaded_file:
             st.pyplot(fig)
 
         elif chart_type == "Lineplot":
-            x = st.selectbox("X-axis (time or ordered variable)", numeric_cols)
+            x = st.selectbox("X-axis (e.g., Year)", numeric_cols)
             y = st.selectbox("Y-axis", [col for col in numeric_cols if col != x])
             fig, ax = plt.subplots()
             sns.lineplot(x=df[x], y=df[y], ax=ax)
             st.pyplot(fig)
 
 else:
-    st.warning("Upload a CSV file to begin analysis.")
-or ML model training and evaluation
+    st.warning("Please upload a CSV file to begin.")
