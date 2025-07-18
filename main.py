@@ -3,21 +3,21 @@ import bcrypt
 
 st.set_page_config(page_title="DataStatPro", layout="wide")
 
-# Pre-hashed passwords for pass123 and guest
-users = {
-    "zmrabet": {
-        "name": "Zouhair Mrabet",
-        "password_hash": b"$2b$12$H0CcfjOxAJ6swhIqYf/k5OLwZ3Ivn/JRO9snWZaF8NFS.8fPgySya"  # pass123
-    },
-    "guest": {
-        "name": "Guest User",
-        "password_hash": b"$2b$12$7sG8mH4YtIHMTnqlZ8gkYedD3dv8muI3P/kzKfpJx9P3PKv8biuXW"  # guest
-    }
+# Plain passwords (only for demo; in production use hashed)
+user_passwords = {
+    "zmrabet": "pass123",
+    "guest": "guest"
 }
 
+# On app start, hash passwords and store in dict
+if "password_hashes" not in st.session_state:
+    st.session_state.password_hashes = {
+        user: bcrypt.hashpw(pw.encode(), bcrypt.gensalt()) for user, pw in user_passwords.items()
+    }
+
 def check_password(username, password):
-    if username in users:
-        return bcrypt.checkpw(password.encode(), users[username]["password_hash"])
+    if username in st.session_state.password_hashes:
+        return bcrypt.checkpw(password.encode(), st.session_state.password_hashes[username])
     return False
 
 if "logged_in" not in st.session_state:
@@ -33,7 +33,7 @@ if not st.session_state.logged_in:
         if check_password(username, password):
             st.session_state.logged_in = True
             st.session_state.username = username
-            st.session_state.name = users[username]["name"]
+            st.session_state.name = username  # or use a dict for nicer names
             st.success(f"Welcome {st.session_state.name}!")
         else:
             st.error("❌ Incorrect username or password")
