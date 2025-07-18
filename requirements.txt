@@ -13,3 +13,5 @@ plotly
 streamlit-authenticator
 PyYAML
 bcrypt
+pmdarima
+scikit-learn
