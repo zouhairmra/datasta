@@ -1,8 +1,5 @@
 import streamlit as st
 
-if 'authentication_status' not in st.session_state or not st.session_state.authentication_status:
-    st.warning("🔒 Please log in to access this page.")
-    st.stop()
 
 import streamlit as st
 import pandas as pd
