@@ -1,20 +1,18 @@
 import streamlit as st
 import streamlit_authenticator as stauth
 
-# Set page config
 st.set_page_config(page_title="DataStatPro", layout="wide")
 
-# Hardcoded hashed passwords
 config = {
     'credentials': {
         'usernames': {
             'zmrabet': {
                 'name': 'Zouhair Mrabet',
-                'password': '$2b$12$H0CcfjOxAJ6swhIqYf/k5OLwZ3Ivn/JRO9snWZaF8NFS.8fPgySya'
+                'password': '$2b$12$H0CcfjOxAJ6swhIqYf/k5OLwZ3Ivn/JRO9snWZaF8NFS.8fPgySya'  # pass123
             },
             'guest': {
                 'name': 'Guest User',
-                'password': '$2b$12$7sG8mH4YtIHMTnqlZ8gkYedD3dv8muI3P/kzKfpJx9P3PKv8biuXW'
+                'password': '$2b$12$7sG8mH4YtIHMTnqlZ8gkYedD3dv8muI3P/kzKfpJx9P3PKv8biuXW'  # guest
             }
         }
     },
@@ -28,7 +26,6 @@ config = {
     }
 }
 
-# Initialize authenticator
 authenticator = stauth.Authenticate(
     config['credentials'],
     config['cookie']['name'],
@@ -36,17 +33,11 @@ authenticator = stauth.Authenticate(
     config['cookie']['expiry_days']
 )
 
-# Show login form
-authenticator.login()
+# Perform login
+name, authentication_status, username = authenticator.login('Login', location='main')
 
-# Fetch credentials
-name = authenticator.credentials.get("name")
-authentication_status = authenticator.authentication_status
-username = authenticator.username
-
-# App logic
 if authentication_status:
-    authenticator.logout("Logout", "sidebar")
+    authenticator.logout('Logout', 'sidebar')
     st.title(f"📊 Welcome, {name}!")
 
     st.markdown("""
@@ -60,6 +51,6 @@ if authentication_status:
     - 🌍 Connect to World Bank datasets
     """)
 elif authentication_status is False:
-    st.error("❌ Incorrect username or password")
+    st.error('❌ Incorrect username or password')
 elif authentication_status is None:
-    st.warning("🕵️ Please enter your username and password")
+    st.warning('🕵️ Please enter your username and password')
