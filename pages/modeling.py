@@ -4,7 +4,6 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import scipy.stats as stats
 
-# Page title
 st.set_page_config(page_title="Modeling", layout="wide")
 st.title("📊 Modeling & Statistical Analysis")
 
@@ -24,6 +23,7 @@ if uploaded_file is not None:
     st.dataframe(df.head())
 
     numeric_cols = df.select_dtypes(include='number').columns.tolist()
+    categorical_cols = df.select_dtypes(include='object').columns.tolist()
 
     if analysis_type == "Descriptive Statistics":
         st.header("Descriptive Statistics")
@@ -64,17 +64,20 @@ if uploaded_file is not None:
 
     elif analysis_type == "Data Visualization":
         st.header("Data Visualization")
-        chart_type = st.selectbox("Choose Chart Type", ["Histogram", "Boxplot", "Scatterplot", "Lineplot"])
+        chart_type = st.selectbox(
+            "Choose Chart Type",
+            ["Histogram", "Boxplot", "Scatterplot", "Lineplot", "Pie Chart"]
+        )
 
         if chart_type == "Histogram":
-            col = st.selectbox("Select Variable", numeric_cols)
+            col = st.selectbox("Select Numeric Variable", numeric_cols)
             bins = st.slider("Number of Bins", 5, 100, 20)
             fig, ax = plt.subplots()
             sns.histplot(df[col], bins=bins, kde=True, ax=ax)
             st.pyplot(fig)
 
         elif chart_type == "Boxplot":
-            col = st.selectbox("Select Variable", numeric_cols)
+            col = st.selectbox("Select Numeric Variable", numeric_cols)
             fig, ax = plt.subplots()
             sns.boxplot(x=df[col], ax=ax)
             st.pyplot(fig)
@@ -92,6 +95,17 @@ if uploaded_file is not None:
             fig, ax = plt.subplots()
             sns.lineplot(x=df[x], y=df[y], ax=ax)
             st.pyplot(fig)
+
+        elif chart_type == "Pie Chart":
+            if len(categorical_cols) > 0:
+                cat_col = st.selectbox("Select Categorical Column", categorical_cols)
+                value_counts = df[cat_col].value_counts()
+                fig, ax = plt.subplots()
+                ax.pie(value_counts.values, labels=value_counts.index, autopct='%1.1f%%', startangle=90)
+                ax.axis('equal')  # Equal aspect ratio ensures pie is drawn as a circle
+                st.pyplot(fig)
+            else:
+                st.warning("No categorical columns available for pie chart.")
 
 else:
     st.warning("Please upload a CSV file to begin.")
