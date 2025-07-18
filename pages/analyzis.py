@@ -5,7 +5,7 @@ import altair as alt
 import streamlit as st
 
 # Get World Bank data via API
-def get_world_bank_data(indicator, countries=["USA", "FRA", "QAT"], start_year=2000, end_year=2022):
+def  def get_world_bank_data(indicator, countries=["USA", "FRA", "QAT"], start_year=2000, end_year=2022):
     all_data = []
 
     for country in countries:
@@ -14,10 +14,16 @@ def get_world_bank_data(indicator, countries=["USA", "FRA", "QAT"], start_year=2
             f"?date={start_year}:{end_year}&format=json&per_page=10000"
         )
         response = requests.get(url)
-        if response.status_code != 200 or not response.json()[1]:
+        
+        try:
+            data = response.json()
+        except Exception:
+            continue  # skip if not a proper JSON
+        
+        if response.status_code != 200 or len(data) < 2 or data[1] is None:
             continue
-        records = response.json()[1]
-        for entry in records:
+
+        for entry in data[1]:
             if entry["value"] is not None:
                 all_data.append({
                     "country": entry["country"]["value"],
@@ -26,6 +32,8 @@ def get_world_bank_data(indicator, countries=["USA", "FRA", "QAT"], start_year=2
                 })
 
     return pd.DataFrame(all_data)
+
+        
 
 # Save uploaded data
 def save_user_data(dataframe, user_folder, filename="uploaded_data.csv"):
