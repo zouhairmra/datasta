@@ -33,12 +33,20 @@ authenticator = stauth.Authenticate(
     config['cookie']['expiry_days']
 )
 
-# Call login() without arguments
-name, authentication_status, username = authenticator.login()
+# Call login without unpacking
+authenticator.login()
+
+# Now get status and info from attributes
+authentication_status = authenticator.authentication_status
+username = authenticator.username
+name = None
+if username:
+    name = config['credentials']['usernames'][username]['name']
 
 if authentication_status:
     authenticator.logout('Logout', 'sidebar')
     st.title(f"📊 Welcome, {name}!")
+
     st.markdown("""
     **DataStatPro** helps you upload, explore, and analyze economic & financial data easily.
 
