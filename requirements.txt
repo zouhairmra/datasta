@@ -1,10 +1,13 @@
+pmdarima
 streamlit
 pandas
 requests
+
 altair
 numpy
 matplotlib
 seaborn
+
 scikit-learn
 statsmodels
 openpyxl
@@ -13,5 +16,5 @@ plotly
 streamlit-authenticator
 PyYAML
 bcrypt
-pmdarima
+
 scikit-learn
