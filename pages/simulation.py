@@ -1,138 +1,141 @@
 import streamlit as st
-import pandas as pd
 import numpy as np
+import pandas as pd
 
-# Sidebar for language selection
-st.sidebar.title("Language / اللغة")
-use_arabic = st.sidebar.checkbox("عرض بالعربية", value=False)
+# Arabic toggle
+arabic = st.sidebar.checkbox("العربية؟")
 
-# Section and sub-section structure
-section = st.sidebar.selectbox(
-    "Choose a section:" if not use_arabic else "اختر القسم:",
+def label(en, ar):
+    return ar if arabic else en
+
+st.title(label("Economics Simulations", "محاكاة مفاهيم الاقتصاد"))
+
+section = st.selectbox(
+    label("Choose a Section", "اختر قسمًا"),
     [
-        "Microeconomics Simulations" if not use_arabic else "محاكاة الاقتصاد الجزئي",
-        "Business Math Applications" if not use_arabic else "تطبيقات الرياضيات الاقتصادية"
+        label("Microeconomics", "الاقتصاد الجزئي"),
+        label("Business Math Concepts", "مفاهيم الرياضيات الاقتصادية")
     ]
 )
 
-# ------------------------- MICROECONOMICS SIMULATIONS --------------------------
 if section.startswith("Micro"):
-    subsection = st.sidebar.selectbox(
-        "Choose a topic:" if not use_arabic else "اختر الموضوع:",
+
+    topic = st.selectbox(
+        label("Select Micro Topic", "اختر موضوعًا"),
         [
-            "Supply and Demand",
-            "Elasticity of Demand",
-            "Production and Cost Functions",
-            "Profit Maximization",
-            "Oligopoly (Game Theory)",
-            "Perfect Competition",
-            "Monopolistic Competition"
+            label("Demand and Supply", "العرض والطلب"),
+            label("Elasticities", "المرونات"),
+            label("Production & Cost Functions", "دوال الإنتاج والتكلفة"),
+            label("Perfect Competition", "السوق التنافسية"),
+            label("Monopolistic Competition", "المنافسة الاحتكارية"),
+            label("Oligopoly (Game Theory)", "الاحتكار القلّي (نظرية الألعاب)"),
         ]
     )
 
-    st.title(subsection if not use_arabic else "")
+    if topic.startswith("Demand"):
+        st.subheader(label("Real-World Example: Gasoline Market", "مثال واقعي: سوق الوقود"))
+        price = st.slider(label("Price (USD)", "السعر بالدولار"), 1.0, 10.0, 3.0)
+        quantity_demanded = 1000 - 100 * price
+        quantity_supplied = -200 + 150 * price
 
-    if subsection == "Supply and Demand":
-        st.header("Supply and Demand Simulation" if not use_arabic else "محاكاة العرض والطلب")
-        price = st.slider("Select price", 1, 100, 50)
-        demand = 100 - price
-        supply = price - 10
-        st.write(f"At price {price}, demand is {demand} and supply is {supply}.")
+        st.write(label(f"Quantity Demanded: {quantity_demanded}", f"الكمية المطلوبة: {quantity_demanded}"))
+        st.write(label(f"Quantity Supplied: {quantity_supplied}", f"الكمية المعروضة: {quantity_supplied}"))
 
-    elif subsection == "Elasticity of Demand":
-        st.header("Elasticity Simulation" if not use_arabic else "مرونة الطلب")
-        q1 = st.number_input("Quantity before", value=100)
-        q2 = st.number_input("Quantity after", value=90)
-        p1 = st.number_input("Price before", value=10)
-        p2 = st.number_input("Price after", value=12)
-        e = ((q2 - q1) / q1) / ((p2 - p1) / p1)
-        st.write(f"Price elasticity of demand: {e:.2f}")
-
-    elif subsection == "Production and Cost Functions":
-        st.header("Production and Cost" if not use_arabic else "الإنتاج والتكلفة")
-        labor = st.slider("Labor input", 1, 100, 20)
-        capital = st.slider("Capital input", 1, 100, 10)
-        output = np.sqrt(labor * capital)
-        cost = 10 * labor + 20 * capital
-        st.write(f"Output: {output:.2f}, Total Cost: ${cost:.2f}")
-
-    elif subsection == "Profit Maximization":
-        st.header("Profit Maximization" if not use_arabic else "تعظيم الربح")
-        price = st.number_input("Product price", value=20)
-        quantity = st.slider("Quantity produced", 1, 100, 10)
-        cost = 5 * quantity + 50
-        revenue = price * quantity
-        profit = revenue - cost
-        st.write(f"Revenue: ${revenue}, Cost: ${cost}, Profit: ${profit}")
-
-    elif subsection == "Oligopoly (Game Theory)":
-        st.header("Game Theory (Cournot Duopoly)" if not use_arabic else "السلوك في السوق الثنائي")
-        q1 = st.slider("Firm A output", 0, 100, 20)
-        q2 = st.slider("Firm B output", 0, 100, 20)
-        market_price = 100 - (q1 + q2)
-        profit1 = q1 * market_price
-        profit2 = q2 * market_price
-        st.write(f"Firm A profit: ${profit1}, Firm B profit: ${profit2}, Market Price: ${market_price}")
-
-    elif subsection == "Perfect Competition":
-        st.header("Perfect Competition" if not use_arabic else "المنافسة الكاملة")
-        price = 50
-        quantity = st.slider("Your firm's output", 1, 100, 10)
-        cost = 30 * quantity
-        revenue = price * quantity
-        profit = revenue - cost
-        st.write(f"Revenue: ${revenue}, Cost: ${cost}, Profit: ${profit}")
-
-    elif subsection == "Monopolistic Competition":
-        st.header("Monopolistic Competition" if not use_arabic else "المنافسة الاحتكارية")
-        price = st.slider("Set your price", 1, 100, 40)
-        demand = 100 - price
-        cost = 20 * demand
-        revenue = price * demand
-        profit = revenue - cost
-        st.write(f"Revenue: ${revenue}, Cost: ${cost}, Profit: ${profit}")
-
-# ------------------------ BUSINESS MATH APPLICATIONS ---------------------------
-else:
-    subsection = st.sidebar.selectbox(
-        "Choose a topic:" if not use_arabic else "اختر الموضوع:",
-        [
-            "Cost Minimization",
-            "Profit Maximization",
-            "Marginal Revenue vs Cost"
-        ]
-    )
-
-    st.title(subsection if not use_arabic else "")
-
-    if subsection == "Cost Minimization":
-        st.header("Cost Minimization" if not use_arabic else "تقليل التكاليف")
-        labor_cost = st.slider("Labor cost per unit", 1, 100, 20)
-        capital_cost = st.slider("Capital cost per unit", 1, 100, 30)
-        output = st.slider("Required output", 10, 100, 50)
-        min_cost = output * (labor_cost * 0.6 + capital_cost * 0.4)
-        st.write(f"Minimum cost to produce {output} units: ${min_cost:.2f}")
-
-    elif subsection == "Profit Maximization":
-        st.header("Profit Maximization" if not use_arabic else "تعظيم الربح")
-        price = st.number_input("Unit price", value=50)
-        variable_cost = st.number_input("Variable cost per unit", value=30)
-        fixed_cost = st.number_input("Fixed cost", value=100)
-        quantity = st.slider("Quantity sold", 1, 100, 10)
-        profit = quantity * (price - variable_cost) - fixed_cost
-        st.write(f"Total profit: ${profit:.2f}")
-
-    elif subsection == "Marginal Revenue vs Cost":
-        st.header("MR = MC Analysis" if not use_arabic else "تحليل الإيراد الحدي والتكلفة الحدية")
-        quantity = st.slider("Quantity", 1, 100, 10)
-        price = 100 - quantity
-        total_revenue = quantity * price
-        marginal_revenue = 100 - 2 * quantity
-        marginal_cost = st.slider("Marginal cost", 1, 100, 20)
-        st.write(f"Marginal Revenue: {marginal_revenue}, Marginal Cost: {marginal_cost}")
-        if marginal_revenue > marginal_cost:
-            st.success("Increase production")
-        elif marginal_revenue < marginal_cost:
-            st.error("Reduce production")
+        if quantity_demanded == quantity_supplied:
+            st.success(label("Market is in equilibrium", "السوق في حالة توازن"))
+        elif quantity_demanded > quantity_supplied:
+            st.warning(label("Excess Demand", "زيادة في الطلب"))
         else:
-            st.info("Profit is maximized at this output level")
+            st.warning(label("Excess Supply", "زيادة في العرض"))
+
+    elif topic.startswith("Elasticities"):
+        st.subheader(label("Example: Elasticity of Coffee", "مثال: مرونة الطلب على القهوة"))
+        base_price = st.number_input(label("Base Price (USD)", "السعر الأساسي بالدولار"), value=4.0)
+        new_price = st.number_input(label("New Price (USD)", "السعر الجديد"), value=5.0)
+        base_quantity = 800
+        new_quantity = 600
+
+        pe = ((new_quantity - base_quantity) / base_quantity) / ((new_price - base_price) / base_price)
+        st.write(label(f"Price Elasticity of Demand = {pe:.2f}", f"مرونة السعر = {pe:.2f}"))
+
+        if abs(pe) > 1:
+            st.info(label("Elastic Demand", "الطلب مرن"))
+        else:
+            st.info(label("Inelastic Demand", "الطلب غير مرن"))
+
+    elif topic.startswith("Production"):
+        st.subheader(label("Example: Factory Production (Short Run)", "مثال: إنتاج مصنع"))
+        labor = st.slider(label("Labor Units", "وحدات العمل"), 1, 10, 5)
+        capital = st.slider(label("Capital Units", "وحدات رأس المال"), 1, 10, 3)
+
+        output = labor**0.5 * capital**0.5
+        cost = labor * 50 + capital * 100
+        st.write(label(f"Output = {output:.2f}", f"الإنتاج = {output:.2f}"))
+        st.write(label(f"Total Cost = ${cost}", f"التكلفة الكلية = ${cost}"))
+
+    elif topic.startswith("Perfect"):
+        st.subheader(label("Example: Wheat Market", "مثال: سوق القمح"))
+        price = st.slider(label("Market Price", "السعر السوقي"), 1.0, 20.0, 10.0)
+        cost = 7.0
+        output = st.slider(label("Output", "الكمية المنتجة"), 1, 100, 50)
+        profit = (price - cost) * output
+        st.write(label(f"Profit = ${profit}", f"الربح = ${profit}"))
+
+    elif topic.startswith("Monopolistic"):
+        st.subheader(label("Example: Restaurant Pricing", "مثال: تسعير مطعم"))
+        demand_price = st.slider(label("Demand-based Price", "السعر حسب الطلب"), 5.0, 50.0, 20.0)
+        cost = 10
+        q = 30
+        revenue = demand_price * q
+        profit = revenue - (q * cost)
+        st.write(label(f"Profit = ${profit}", f"الربح = ${profit}"))
+
+    elif topic.startswith("Oligopoly"):
+        st.subheader(label("Cournot Duopoly", "احتكار ثنائي - نموذج كورنو"))
+        q1 = st.slider(label("Firm 1 Quantity", "كمية الشركة 1"), 0, 100, 40)
+        q2 = st.slider(label("Firm 2 Quantity", "كمية الشركة 2"), 0, 100, 40)
+        price = 100 - (q1 + q2)
+        profit1 = q1 * price - q1 * 20
+        profit2 = q2 * price - q2 * 20
+
+        st.write(label(f"Firm 1 Profit: ${profit1}", f"ربح الشركة 1: ${profit1}"))
+        st.write(label(f"Firm 2 Profit: ${profit2}", f"ربح الشركة 2: ${profit2}"))
+
+elif section.startswith("Business"):
+    st.subheader(label("Business Math Concepts", "مفاهيم رياضية اقتصادية"))
+
+    topic = st.selectbox(
+        label("Choose a Concept", "اختر مفهوما"),
+        [
+            label("Cost Minimization", "تقليل التكلفة"),
+            label("Profit Maximization", "تعظيم الربح"),
+            label("Marginal Analysis", "التحليل الحدي"),
+        ]
+    )
+
+    if topic.startswith("Cost"):
+        st.subheader(label("Example: Bakery Cost", "مثال: تكلفة المخبز"))
+        labor = st.slider(label("Labor (hrs)", "العمل بالساعات"), 1, 100, 50)
+        capital = st.slider(label("Capital ($)", "رأس المال"), 100, 1000, 500)
+        cost = labor * 20 + capital * 0.5
+        st.write(label(f"Total Cost: ${cost}", f"التكلفة الإجمالية: ${cost}"))
+
+    elif topic.startswith("Profit"):
+        st.subheader(label("Example: Selling Bottled Water", "مثال: بيع زجاجات المياه"))
+        price = st.slider(label("Price per Bottle", "سعر الزجاجة"), 0.5, 5.0, 2.0)
+        cost = 0.5
+        quantity = st.slider(label("Quantity Sold", "الكمية المباعة"), 0, 1000, 300)
+        profit = (price - cost) * quantity
+        st.write(label(f"Profit: ${profit}", f"الربح: ${profit}"))
+
+    elif topic.startswith("Marginal"):
+        st.subheader(label("Example: Marginal Revenue vs Cost", "مثال: الإيراد الحدي مقابل التكلفة الحدية"))
+        q = st.slider(label("Quantity", "الكمية"), 1, 100, 10)
+        MR = 100 - 2*q
+        MC = 20 + q
+        st.write(label(f"Marginal Revenue = {MR}", f"الإيراد الحدي = {MR}"))
+        st.write(label(f"Marginal Cost = {MC}", f"التكلفة الحدية = {MC}"))
+
+        if abs(MR - MC) < 5:
+            st.success(label("Near Profit Maximization", "نحو تعظيم الربح"))
+
