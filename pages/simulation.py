@@ -172,18 +172,21 @@ elif section == translate("AI Assistant", "المساعد الذكي"):
     if user_question:
         with st.spinner(translate("Thinking...", "جارٍ التفكير...")):
             try:
-                response = openai.ChatCompletion.create(
-                    model="gpt-4",
-                    messages=[
-                        {"role": "system", "content": "You are an expert assistant helping Arabic-speaking students understand microeconomics and business mathematics. Use simple examples and explain clearly."},
-                        {"role": "user", "content": user_question}
-                    ],
-                    temperature=0.7,
-                    max_tokens=1000,
-                    n=1,
-                    stop=None,
-                )
-                answer = response.choices[0].message.content
+              from openai import OpenAI
+
+client = OpenAI(api_key=st.secrets["openai"]["api_key"])
+
+chat_completion = client.chat.completions.create(
+    model="gpt-4",
+    messages=[
+        {"role": "system", "content": "You are an expert assistant helping Arabic-speaking students understand microeconomics and business mathematics. Use simple examples and explain clearly."},
+        {"role": "user", "content": user_question}
+    ],
+    temperature=0.7,
+    max_tokens=1000
+)
+
+answer = chat_completion.choices[0].message.content
                 st.success(answer)
 
             except Exception as e:
