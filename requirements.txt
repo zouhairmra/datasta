@@ -7,7 +7,7 @@ altair
 numpy
 matplotlib
 seaborn
-
+llama-index
 scikit-learn
 statsmodels
 openpyxl
