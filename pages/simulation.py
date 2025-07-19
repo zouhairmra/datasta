@@ -1,171 +1,138 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 
-# Set page config
-st.set_page_config(page_title="Economics Simulations", layout="wide")
-st.title("📊 Microeconomics & Business Math Simulations")
+# Sidebar for language selection
+st.sidebar.title("Language / اللغة")
+use_arabic = st.sidebar.checkbox("عرض بالعربية", value=False)
 
-# Sidebar Navigation
-section = st.sidebar.selectbox("Select Section", [
-    "Microeconomics Simulations",
-    "Business Math Applications"
-])
+# Section and sub-section structure
+section = st.sidebar.selectbox(
+    "Choose a section:" if not use_arabic else "اختر القسم:",
+    [
+        "Microeconomics Simulations" if not use_arabic else "محاكاة الاقتصاد الجزئي",
+        "Business Math Applications" if not use_arabic else "تطبيقات الرياضيات الاقتصادية"
+    ]
+)
 
-# Arabic translations dictionary
-translations = {
-    "Supply and Demand": "العرض والطلب",
-    "Elasticity": "المرونة",
-    "Production Functions": "دوال الإنتاج",
-    "Oligopoly (Game Theory)": "الاحتكار القليل (نظرية الألعاب)",
-    "Competitive Market": "السوق التنافسية",
-    "Monopolistic Competition": "المنافسة الاحتكارية",
-    "Cost Minimization": "تقليل التكاليف",
-    "Profit Maximization": "تعظيم الأرباح",
-    "Marginal Revenue Analysis": "تحليل الإيراد الحدي",
-    "Choose Concept": "اختر المفهوم",
-    "Choose Scenario": "اختر السيناريو",
-    "Show Arabic": "عرض بالعربية"
-}
+# ------------------------- MICROECONOMICS SIMULATIONS --------------------------
+if section.startswith("Micro"):
+    subsection = st.sidebar.selectbox(
+        "Choose a topic:" if not use_arabic else "اختر الموضوع:",
+        [
+            "Supply and Demand",
+            "Elasticity of Demand",
+            "Production and Cost Functions",
+            "Profit Maximization",
+            "Oligopoly (Game Theory)",
+            "Perfect Competition",
+            "Monopolistic Competition"
+        ]
+    )
 
-# Arabic Toggle
-def translate(text):
-    return translations.get(text, text)
+    st.title(subsection if not use_arabic else "")
 
-show_arabic = st.sidebar.checkbox("Show Arabic", value=False)
+    if subsection == "Supply and Demand":
+        st.header("Supply and Demand Simulation" if not use_arabic else "محاكاة العرض والطلب")
+        price = st.slider("Select price", 1, 100, 50)
+        demand = 100 - price
+        supply = price - 10
+        st.write(f"At price {price}, demand is {demand} and supply is {supply}.")
 
-def label(text):
-    return f"{text} ({translate(text)})" if show_arabic else text
+    elif subsection == "Elasticity of Demand":
+        st.header("Elasticity Simulation" if not use_arabic else "مرونة الطلب")
+        q1 = st.number_input("Quantity before", value=100)
+        q2 = st.number_input("Quantity after", value=90)
+        p1 = st.number_input("Price before", value=10)
+        p2 = st.number_input("Price after", value=12)
+        e = ((q2 - q1) / q1) / ((p2 - p1) / p1)
+        st.write(f"Price elasticity of demand: {e:.2f}")
 
-# Concept & Scenario Selector
-def show_simulation(concepts):
-    concept = st.selectbox(label("Choose Concept"), concepts)
+    elif subsection == "Production and Cost Functions":
+        st.header("Production and Cost" if not use_arabic else "الإنتاج والتكلفة")
+        labor = st.slider("Labor input", 1, 100, 20)
+        capital = st.slider("Capital input", 1, 100, 10)
+        output = np.sqrt(labor * capital)
+        cost = 10 * labor + 20 * capital
+        st.write(f"Output: {output:.2f}, Total Cost: ${cost:.2f}")
 
-    if concept == "Supply and Demand":
-        scenario = st.radio(label("Choose Scenario"), [
-            "Shift in Demand",
-            "Shift in Supply",
-            "Price Floor/Ceiling"
-        ])
-        if scenario == "Shift in Demand":
-            st.subheader("🔄 Real Example: Increase in Demand for EVs")
-            st.markdown("""
-            In recent years, electric vehicles (EVs) have seen a surge in demand due to environmental awareness and government incentives.
-            
-            **Before Shift:** Demand = D1, Price = P1, Quantity = Q1  
-            **After Shift:** Demand = D2, Price rises to P2, Quantity increases to Q2
-            
-            *You can simulate the change using Streamlit sliders in future.*
-            """)
-        elif scenario == "Shift in Supply":
-            st.subheader("🚜 Real Example: Technological Advancement in Agriculture")
-            st.markdown("""
-            Suppose new farming technology reduces the cost of wheat production. This shifts supply rightward.
+    elif subsection == "Profit Maximization":
+        st.header("Profit Maximization" if not use_arabic else "تعظيم الربح")
+        price = st.number_input("Product price", value=20)
+        quantity = st.slider("Quantity produced", 1, 100, 10)
+        cost = 5 * quantity + 50
+        revenue = price * quantity
+        profit = revenue - cost
+        st.write(f"Revenue: ${revenue}, Cost: ${cost}, Profit: ${profit}")
 
-            **Before Shift:** Supply = S1, Price = P1, Quantity = Q1  
-            **After Shift:** Supply = S2, Price falls to P2, Quantity increases to Q2
-            """)
-        elif scenario == "Price Floor/Ceiling":
-            st.subheader("🏠 Real Example: Rent Control in New York")
-            st.markdown("""
-            A price ceiling on rent below market rate leads to housing shortages.
-            
-            **Equilibrium Rent:** $1,500  
-            **Ceiling Price:** $1,000 → Shortage of housing supply
-            """)
+    elif subsection == "Oligopoly (Game Theory)":
+        st.header("Game Theory (Cournot Duopoly)" if not use_arabic else "السلوك في السوق الثنائي")
+        q1 = st.slider("Firm A output", 0, 100, 20)
+        q2 = st.slider("Firm B output", 0, 100, 20)
+        market_price = 100 - (q1 + q2)
+        profit1 = q1 * market_price
+        profit2 = q2 * market_price
+        st.write(f"Firm A profit: ${profit1}, Firm B profit: ${profit2}, Market Price: ${market_price}")
 
-    elif concept == "Elasticity":
-        scenario = st.radio(label("Choose Scenario"), [
-            "Price Elasticity of Demand",
-            "Income Elasticity"
-        ])
-        if scenario == "Price Elasticity of Demand":
-            st.subheader("💡 Real Example: Luxury Cars vs Bread")
-            st.markdown("""
-            **Luxury Cars** have elastic demand → 10% ↑ in price → 20% ↓ in demand  
-            **Bread** has inelastic demand → 10% ↑ in price → 2% ↓ in demand
-            """)
+    elif subsection == "Perfect Competition":
+        st.header("Perfect Competition" if not use_arabic else "المنافسة الكاملة")
+        price = 50
+        quantity = st.slider("Your firm's output", 1, 100, 10)
+        cost = 30 * quantity
+        revenue = price * quantity
+        profit = revenue - cost
+        st.write(f"Revenue: ${revenue}, Cost: ${cost}, Profit: ${profit}")
 
-    elif concept == "Production Functions":
-        scenario = st.radio(label("Choose Scenario"), [
-            "Short-run Costs",
-            "Long-run Production"
-        ])
-        if scenario == "Short-run Costs":
-            st.subheader("🏭 Real Example: Shoe Factory Costs")
-            st.markdown("""
-            A factory adds workers while keeping machines fixed → diminishing marginal returns.
-            
-            **Output:** Initially increases quickly, then slower
-            **Costs:** Marginal cost increases
-            """)
+    elif subsection == "Monopolistic Competition":
+        st.header("Monopolistic Competition" if not use_arabic else "المنافسة الاحتكارية")
+        price = st.slider("Set your price", 1, 100, 40)
+        demand = 100 - price
+        cost = 20 * demand
+        revenue = price * demand
+        profit = revenue - cost
+        st.write(f"Revenue: ${revenue}, Cost: ${cost}, Profit: ${profit}")
 
-    elif concept == "Oligopoly (Game Theory)":
-        st.subheader("🎮 Real Example: Airline Price Wars")
-        st.markdown("""
-        Delta and United must decide whether to lower prices. If both cut prices → less profit. If one cuts and the other doesn’t → winner takes market.
+# ------------------------ BUSINESS MATH APPLICATIONS ---------------------------
+else:
+    subsection = st.sidebar.selectbox(
+        "Choose a topic:" if not use_arabic else "اختر الموضوع:",
+        [
+            "Cost Minimization",
+            "Profit Maximization",
+            "Marginal Revenue vs Cost"
+        ]
+    )
 
-        This is a typical **Prisoner's Dilemma** structure.
-        """)
+    st.title(subsection if not use_arabic else "")
 
-    elif concept == "Competitive Market":
-        st.subheader("📈 Real Example: Wheat Farming")
-        st.markdown("""
-        Thousands of identical wheat farms with no pricing power.
+    if subsection == "Cost Minimization":
+        st.header("Cost Minimization" if not use_arabic else "تقليل التكاليف")
+        labor_cost = st.slider("Labor cost per unit", 1, 100, 20)
+        capital_cost = st.slider("Capital cost per unit", 1, 100, 30)
+        output = st.slider("Required output", 10, 100, 50)
+        min_cost = output * (labor_cost * 0.6 + capital_cost * 0.4)
+        st.write(f"Minimum cost to produce {output} units: ${min_cost:.2f}")
 
-        **Market Outcome:** Firms are price takers. Long-run profits = 0
-        """)
+    elif subsection == "Profit Maximization":
+        st.header("Profit Maximization" if not use_arabic else "تعظيم الربح")
+        price = st.number_input("Unit price", value=50)
+        variable_cost = st.number_input("Variable cost per unit", value=30)
+        fixed_cost = st.number_input("Fixed cost", value=100)
+        quantity = st.slider("Quantity sold", 1, 100, 10)
+        profit = quantity * (price - variable_cost) - fixed_cost
+        st.write(f"Total profit: ${profit:.2f}")
 
-    elif concept == "Monopolistic Competition":
-        st.subheader("🛍️ Real Example: Fast Food Chains")
-        st.markdown("""
-        Firms like McDonald's and Burger King differentiate products but face competition.
-
-        **Short-run:** Positive profit  
-        **Long-run:** Entry reduces profit to 0
-        """)
-
-def show_business_math():
-    concept = st.selectbox(label("Choose Concept"), [
-        "Cost Minimization",
-        "Profit Maximization",
-        "Marginal Revenue Analysis"
-    ])
-
-    if concept == "Cost Minimization":
-        st.subheader("💼 Real Example: Minimizing Delivery Costs")
-        st.markdown("""
-        A logistics firm uses optimization to minimize costs by rerouting trucks.
-        
-        **Objective:** Minimize total cost C = f(distance, fuel, labor)
-        """)
-
-    elif concept == "Profit Maximization":
-        st.subheader("📊 Real Example: Smartphone Pricing")
-        st.markdown("""
-        A phone company estimates demand Q = 100 - 2P.  
-        Revenue = P × Q, Cost = 10Q.  
-        
-        **Max Profit:** where MR = MC
-        """)
-
-    elif concept == "Marginal Revenue Analysis":
-        st.subheader("📉 Real Example: Streaming Platform Pricing")
-        st.markdown("""
-        A streaming service analyzes revenue when adding subscribers. 
-
-        **Rule:** Keep adding users until Marginal Revenue = Marginal Cost
-        """)
-
-# Main Execution
-if section == "Microeconomics Simulations":
-    show_simulation([
-        "Supply and Demand",
-        "Elasticity",
-        "Production Functions",
-        "Oligopoly (Game Theory)",
-        "Competitive Market",
-        "Monopolistic Competition"
-    ])
-
-elif section == "Business Math Applications":
-    show_business_math()
+    elif subsection == "Marginal Revenue vs Cost":
+        st.header("MR = MC Analysis" if not use_arabic else "تحليل الإيراد الحدي والتكلفة الحدية")
+        quantity = st.slider("Quantity", 1, 100, 10)
+        price = 100 - quantity
+        total_revenue = quantity * price
+        marginal_revenue = 100 - 2 * quantity
+        marginal_cost = st.slider("Marginal cost", 1, 100, 20)
+        st.write(f"Marginal Revenue: {marginal_revenue}, Marginal Cost: {marginal_cost}")
+        if marginal_revenue > marginal_cost:
+            st.success("Increase production")
+        elif marginal_revenue < marginal_cost:
+            st.error("Reduce production")
+        else:
+            st.info("Profit is maximized at this output level")
