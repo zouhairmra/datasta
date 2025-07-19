@@ -9,6 +9,9 @@ numpy
 matplotlib
 seaborn
 llama_index
+llama-index
+llama-index-llms-ollama
+llama-index-embeddings-huggingface
 scikit-learn
 statsmodels
 openpyxl
