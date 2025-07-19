@@ -1,7 +1,7 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
-import openai
+from openai import OpenAI
 
 # Set page config
 st.set_page_config(page_title="Economic Simulation Center", layout="wide")
