@@ -112,25 +112,37 @@ if section == translate("Microeconomics Simulations", "محاكاة الاقتص
             "تقوم شركتا بوينغ وإيرباص بتقييد الإنتاج للحفاظ على الأسعار مرتفعة، تمامًا كما يوضح نموذج كورنو."
         ))
 
-# AI Assistant Section
+# AI Assistant Section (without OpenAI)
 elif section == translate("AI Assistant", "المساعد الذكي"):
     st.header(translate("Ask the AI Assistant", "اسأل المساعد الذكي"))
 
     user_question = st.text_area(translate("Ask any question related to microeconomics or business math.",
                                            "اطرح أي سؤال متعلق بالاقتصاد الجزئي أو الرياضيات للأعمال."))
+
     if user_question:
         with st.spinner(translate("Thinking...", "جارٍ التفكير...")):
-            import openai
-            import os
-            
-            openai.api_key = os.getenv("OPENAI_API_KEY")
+            answer = ""
+            question_lower = user_question.lower()
 
-            response = openai.ChatCompletion.create(
-                model="gpt-4",
-                messages=[
-                    {"role": "system", "content": "You are an expert assistant helping Arabic-speaking students understand microeconomics and business mathematics. Use simple examples and explain clearly."},
-                    {"role": "user", "content": user_question}
-                ]
-            )
+            if "elasticity" in question_lower or "مرونة" in user_question:
+                answer = translate(
+                    "Elasticity measures how much quantity demanded or supplied changes when the price changes. For example, if a 10% increase in price causes a 20% drop in demand, the price elasticity is -2.",
+                    "تقيس المرونة مقدار تغير الكمية المطلوبة أو المعروضة عند تغير السعر. على سبيل المثال، إذا أدت زيادة بنسبة 10٪ في السعر إلى انخفاض بنسبة 20٪ في الطلب، فإن المرونة السعرية هي -2."
+                )
+            elif "supply" in question_lower or "demand" in question_lower or "العرض" in user_question or "الطلب" in user_question:
+                answer = translate(
+                    "Supply is the quantity producers are willing to sell at a given price, while demand is the quantity consumers are willing to buy. The intersection determines the market price.",
+                    "العرض هو كمية السلع التي يرغب المنتجون في بيعها عند سعر معين، بينما الطلب هو كمية السلع التي يرغب المستهلكون في شرائها. يتحدد السعر في السوق عند تقاطع العرض والطلب."
+                )
+            elif "cost" in question_lower or "التكلفة" in user_question:
+                answer = translate(
+                    "Total cost is the sum of fixed and variable costs. Marginal cost is the change in total cost from producing one more unit.",
+                    "التكلفة الإجمالية هي مجموع التكاليف الثابتة والمتغيرة. التكلفة الحدية هي التغير في التكلفة الإجمالية عند إنتاج وحدة إضافية."
+                )
+            else:
+                answer = translate(
+                    "Sorry, I currently only answer questions about elasticity, supply/demand, and cost. More features coming soon!",
+                    "عذرًا، يمكنني حالياً الإجابة فقط على الأسئلة المتعلقة بالمرونة، العرض والطلب، والتكلفة. المزيد من الميزات قريباً!"
+                )
 
-            st.success(response.choices[0].message.content)
+            st.success(answer)
