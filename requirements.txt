@@ -8,6 +8,7 @@ altair
 numpy
 matplotlib
 seaborn
+llama-cpp-python
 llama_index
 llama-index>=0.10.20
 llama-index-llms-ollama
