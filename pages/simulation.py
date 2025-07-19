@@ -1,108 +1,171 @@
 import streamlit as st
+import pandas as pd
 
-st.set_page_config(page_title="Microeconomics Simulation Center", layout="wide")
-st.title("🧮 Microeconomics Simulation Center")
+# Set page config
+st.set_page_config(page_title="Economics Simulations", layout="wide")
+st.title("📊 Microeconomics & Business Math Simulations")
 
-st.markdown("""
-Welcome to the interactive simulation center. Select a topic below to explore different economic scenarios, available in **English** and **Arabic**.
-""")
-
-# Sidebar selection
-section = st.sidebar.radio("Choose a simulation topic:", [
-    "Supply & Demand",
-    "Elasticities",
-    "Production & Cost Functions",
-    "Market Structures",
-    "Game Theory",
-    "Business Math Concepts"
+# Sidebar Navigation
+section = st.sidebar.selectbox("Select Section", [
+    "Microeconomics Simulations",
+    "Business Math Applications"
 ])
 
-# Scenario options per section
-if section == "Supply & Demand":
-    st.header("📈 Supply & Demand Simulation")
-    scenario = st.selectbox("Choose a scenario:", [
-        "Shift in Demand",
-        "Shift in Supply",
-        "Price Ceiling & Floor",
-        "Equilibrium Dynamics"
-    ])
-    
-    if scenario == "Shift in Demand":
+# Arabic translations dictionary
+translations = {
+    "Supply and Demand": "العرض والطلب",
+    "Elasticity": "المرونة",
+    "Production Functions": "دوال الإنتاج",
+    "Oligopoly (Game Theory)": "الاحتكار القليل (نظرية الألعاب)",
+    "Competitive Market": "السوق التنافسية",
+    "Monopolistic Competition": "المنافسة الاحتكارية",
+    "Cost Minimization": "تقليل التكاليف",
+    "Profit Maximization": "تعظيم الأرباح",
+    "Marginal Revenue Analysis": "تحليل الإيراد الحدي",
+    "Choose Concept": "اختر المفهوم",
+    "Choose Scenario": "اختر السيناريو",
+    "Show Arabic": "عرض بالعربية"
+}
+
+# Arabic Toggle
+def translate(text):
+    return translations.get(text, text)
+
+show_arabic = st.sidebar.checkbox("Show Arabic", value=False)
+
+def label(text):
+    return f"{text} ({translate(text)})" if show_arabic else text
+
+# Concept & Scenario Selector
+def show_simulation(concepts):
+    concept = st.selectbox(label("Choose Concept"), concepts)
+
+    if concept == "Supply and Demand":
+        scenario = st.radio(label("Choose Scenario"), [
+            "Shift in Demand",
+            "Shift in Supply",
+            "Price Floor/Ceiling"
+        ])
+        if scenario == "Shift in Demand":
+            st.subheader("🔄 Real Example: Increase in Demand for EVs")
+            st.markdown("""
+            In recent years, electric vehicles (EVs) have seen a surge in demand due to environmental awareness and government incentives.
+            
+            **Before Shift:** Demand = D1, Price = P1, Quantity = Q1  
+            **After Shift:** Demand = D2, Price rises to P2, Quantity increases to Q2
+            
+            *You can simulate the change using Streamlit sliders in future.*
+            """)
+        elif scenario == "Shift in Supply":
+            st.subheader("🚜 Real Example: Technological Advancement in Agriculture")
+            st.markdown("""
+            Suppose new farming technology reduces the cost of wheat production. This shifts supply rightward.
+
+            **Before Shift:** Supply = S1, Price = P1, Quantity = Q1  
+            **After Shift:** Supply = S2, Price falls to P2, Quantity increases to Q2
+            """)
+        elif scenario == "Price Floor/Ceiling":
+            st.subheader("🏠 Real Example: Rent Control in New York")
+            st.markdown("""
+            A price ceiling on rent below market rate leads to housing shortages.
+            
+            **Equilibrium Rent:** $1,500  
+            **Ceiling Price:** $1,000 → Shortage of housing supply
+            """)
+
+    elif concept == "Elasticity":
+        scenario = st.radio(label("Choose Scenario"), [
+            "Price Elasticity of Demand",
+            "Income Elasticity"
+        ])
+        if scenario == "Price Elasticity of Demand":
+            st.subheader("💡 Real Example: Luxury Cars vs Bread")
+            st.markdown("""
+            **Luxury Cars** have elastic demand → 10% ↑ in price → 20% ↓ in demand  
+            **Bread** has inelastic demand → 10% ↑ in price → 2% ↓ in demand
+            """)
+
+    elif concept == "Production Functions":
+        scenario = st.radio(label("Choose Scenario"), [
+            "Short-run Costs",
+            "Long-run Production"
+        ])
+        if scenario == "Short-run Costs":
+            st.subheader("🏭 Real Example: Shoe Factory Costs")
+            st.markdown("""
+            A factory adds workers while keeping machines fixed → diminishing marginal returns.
+            
+            **Output:** Initially increases quickly, then slower
+            **Costs:** Marginal cost increases
+            """)
+
+    elif concept == "Oligopoly (Game Theory)":
+        st.subheader("🎮 Real Example: Airline Price Wars")
         st.markdown("""
-        **Example**: What happens if consumers' income increases?
+        Delta and United must decide whether to lower prices. If both cut prices → less profit. If one cuts and the other doesn’t → winner takes market.
 
-        → Demand curve shifts right. Equilibrium price and quantity rise.
+        This is a typical **Prisoner's Dilemma** structure.
         """)
-        # Here you can add sliders or charts
 
-elif section == "Elasticities":
-    st.header("📊 Elasticity Explorer")
-    topic = st.selectbox("Choose an elasticity concept:", [
-        "Price Elasticity of Demand",
-        "Income Elasticity",
-        "Cross-Price Elasticity"
-    ])
-    
-    if topic == "Price Elasticity of Demand":
+    elif concept == "Competitive Market":
+        st.subheader("📈 Real Example: Wheat Farming")
         st.markdown("""
-        **Example**: If price rises by 10% and quantity demanded falls by 20% → Elasticity = -2
-        → This is elastic demand.
+        Thousands of identical wheat farms with no pricing power.
+
+        **Market Outcome:** Firms are price takers. Long-run profits = 0
         """)
 
-elif section == "Production & Cost Functions":
-    st.header("🏭 Production & Cost Simulation")
-    scenario = st.selectbox("Choose a scenario:", [
-        "Short Run Cost Curve",
-        "Long Run Average Cost",
-        "Profit Maximization"
-    ])
-    
-    if scenario == "Profit Maximization":
+    elif concept == "Monopolistic Competition":
+        st.subheader("🛍️ Real Example: Fast Food Chains")
         st.markdown("""
-        **Example**: Given a cost and revenue function, find output where MR = MC.
+        Firms like McDonald's and Burger King differentiate products but face competition.
+
+        **Short-run:** Positive profit  
+        **Long-run:** Entry reduces profit to 0
         """)
 
-elif section == "Market Structures":
-    st.header("🏦 Market Structures")
-    market_type = st.selectbox("Choose a market type:", [
-        "Perfect Competition",
-        "Monopoly",
-        "Monopolistic Competition",
-        "Oligopoly"
-    ])
-
-    if market_type == "Perfect Competition":
-        st.markdown("""
-        **Example**: Firm is price taker, P = MR. Profit maximization at P = MC.
-        """)
-
-elif section == "Game Theory":
-    st.header("🎯 Oligopoly & Game Theory")
-    model = st.selectbox("Choose a model:", [
-        "Prisoner's Dilemma",
-        "Nash Equilibrium",
-        "Cournot Competition"
-    ])
-    
-    if model == "Prisoner's Dilemma":
-        st.markdown("""
-        **Example**: Two firms choosing whether to collude or compete.
-        → Best response leads to equilibrium (defect, defect).
-        """)
-
-elif section == "Business Math Concepts":
-    st.header("📐 Business Math in Economics")
-    concept = st.selectbox("Choose a concept:", [
+def show_business_math():
+    concept = st.selectbox(label("Choose Concept"), [
         "Cost Minimization",
         "Profit Maximization",
-        "Marginal Analysis",
-        "Break-even Analysis"
+        "Marginal Revenue Analysis"
     ])
-    
+
     if concept == "Cost Minimization":
+        st.subheader("💼 Real Example: Minimizing Delivery Costs")
         st.markdown("""
-        **Example**: Use Lagrange method to minimize cost given production target.
+        A logistics firm uses optimization to minimize costs by rerouting trucks.
+        
+        **Objective:** Minimize total cost C = f(distance, fuel, labor)
         """)
 
-st.markdown("---")
-st.markdown("**Note:** All simulations will be extended with charts and interactive components. Arabic translation coming soon.")
+    elif concept == "Profit Maximization":
+        st.subheader("📊 Real Example: Smartphone Pricing")
+        st.markdown("""
+        A phone company estimates demand Q = 100 - 2P.  
+        Revenue = P × Q, Cost = 10Q.  
+        
+        **Max Profit:** where MR = MC
+        """)
+
+    elif concept == "Marginal Revenue Analysis":
+        st.subheader("📉 Real Example: Streaming Platform Pricing")
+        st.markdown("""
+        A streaming service analyzes revenue when adding subscribers. 
+
+        **Rule:** Keep adding users until Marginal Revenue = Marginal Cost
+        """)
+
+# Main Execution
+if section == "Microeconomics Simulations":
+    show_simulation([
+        "Supply and Demand",
+        "Elasticity",
+        "Production Functions",
+        "Oligopoly (Game Theory)",
+        "Competitive Market",
+        "Monopolistic Competition"
+    ])
+
+elif section == "Business Math Applications":
+    show_business_math()
