@@ -7,7 +7,7 @@ from openai import OpenAI
 st.set_page_config(page_title="Economic Simulation Center", layout="wide")
 
 # Securely load your OpenAI API key from Streamlit secrets
-openai.api_key = st.secrets["openai"]["api_key"]  # Make sure you set this in your secrets.toml
+client = openai.api_key = st.secrets["openai"]["api_key"]  # Make sure you set this in your secrets.toml
 
 # Translation helper
 language = st.radio("🌐 Choose Language / اختر اللغة", ["English", "العربية"])
