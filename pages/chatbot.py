@@ -1,20 +1,20 @@
+import os
 import streamlit as st
-from llama_index.core import SimpleDirectoryReader, VectorStoreIndex
+from llama_index.core import VectorStoreIndex, SimpleDirectoryReader
 
-st.title("Economics Chatbot")
+PDF_DIR = "data/pdfs"
 
-# Load docs from a folder
-docs = SimpleDirectoryReader("data/pdfs").load_data()
+if not os.path.exists(PDF_DIR):
+    st.error(f"📁 Directory `{PDF_DIR}` not found. Please upload your PDF files to that folder.")
+else:
+    docs = SimpleDirectoryReader(PDF_DIR).load_data()
+    index = VectorStoreIndex.from_documents(docs)
+    query_engine = index.as_query_engine()
 
-# Build index
-index = VectorStoreIndex.from_documents(docs)
+    st.title("📚 Economic Chatbot")
 
-# Query engine
-query_engine = index.as_query_engine()
+    query = st.text_input("Ask a question about the uploaded documents:")
 
-# User input
-question = st.text_input("Ask a question about your economics PDFs:")
-
-if question:
-    response = query_engine.query(question)
-    st.write(response)
+    if query:
+        response = query_engine.query(query)
+        st.write(response)
