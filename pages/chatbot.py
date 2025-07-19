@@ -1,61 +1,77 @@
 import streamlit as st
 from llama_index.llms.ollama import Ollama
-from llama_index.core.chat_engine import CondenseQuestionChatEngine
-from llama_index.core import VectorStoreIndex, SimpleNodeParser, Document
+from llama_index.core import VectorStoreIndex, Document
+from llama_index.core.node_parser import SimpleNodeParser
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.core.service_context import ServiceContext
 from llama_index.core.memory import ChatMemoryBuffer
+from llama_index.core.chat_engine import CondenseQuestionChatEngine
 
-# Streamlit page config
-st.set_page_config(page_title="💬 AI Tutor", layout="wide")
-st.title("📘🤖 Tutor IA en économie & mathématiques (arabe)")
+# --- Sidebar ---
+st.sidebar.title("📚 Datasta TutorBot")
+st.sidebar.markdown("Ask me anything about Microeconomics or Business Math in Arabic!")
 
-# Load the model from Ollama (must be running locally)
-llm = Ollama(model="llama3")
+# --- Initialize only once ---
+@st.cache_resource
+def initialize_chat_engine():
+    # Use Arabic-friendly embedding
+    embed_model = HuggingFaceEmbedding(model_name="intfloat/multilingual-e5-base")
 
-# Example knowledge base (you can customize this later)
-documents = [
-    Document(text="""
-        الاقتصاد الجزئي يدرس سلوك الأفراد والمؤسسات في اتخاذ القرارات حول تخصيص الموارد المحدودة. 
-        مفاهيم أساسية تشمل: العرض والطلب، التوازن في السوق، مرونة الأسعار، التكلفة الحدية، والإيراد الحدي.
-        
-        الرياضيات للأعمال تشمل: النسب المئوية، الفائدة البسيطة والمركبة، تحليل التكلفة والعائد، المعادلات الخطية، والمصفوفات.
-    """)
-]
+    # Local LLM from Ollama
+    llm = Ollama(model="llama3")
 
-# Embedding + parser
-embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
-parser = SimpleNodeParser()
+    # Mini knowledge base for Microeconomics/Business Math (you can expand this)
+    content = """
+    الاقتصاد الجزئي هو فرع من فروع الاقتصاد يركز على سلوك الأفراد والشركات في اتخاذ القرارات بشأن تخصيص الموارد. من مفاهيمه: العرض والطلب، توازن السوق، مرونة الأسعار، وتكاليف الإنتاج.
 
-# Vector index
-nodes = parser.get_nodes_from_documents(documents)
-service_context = ServiceContext.from_defaults(llm=llm, embed_model=embed_model)
-index = VectorStoreIndex(nodes, service_context=service_context)
+    في الرياضيات للأعمال، نستخدم مفاهيم مثل الدوال، المعادلات الخطية، التفاضل، ونسب النمو لفهم وتحليل مسائل اقتصادية مثل تعظيم الربح أو تقليل التكاليف.
+    """
 
-# Memory
-memory = ChatMemoryBuffer.from_defaults(token_limit=1500)
+    documents = [Document(text=content)]
+    parser = SimpleNodeParser()
+    nodes = parser.get_nodes_from_documents(documents)
 
-# Chat engine
-chat_engine = index.as_chat_engine(
-    chat_mode="context",
-    memory=memory,
-    system_prompt="أنت مساعد ذكي لشرح مفاهيم الاقتصاد الجزئي والرياضيات التجارية باللغة العربية للطلاب.",
-)
+    index = VectorStoreIndex(nodes)
+    memory = ChatMemoryBuffer.from_defaults(token_limit=1500)
 
-# Chat interface
+    service_context = ServiceContext.from_defaults(
+        llm=llm,
+        embed_model=embed_model
+    )
+
+    return CondenseQuestionChatEngine.from_defaults(
+        index=index,
+        service_context=service_context,
+        memory=memory,
+        verbose=True,
+    )
+
+# --- Load engine ---
+chat_engine = initialize_chat_engine()
+
+# --- Chat UI ---
+st.title("🤖 Microeconomics & Business Math Chatbot")
+st.markdown("اسألني عن مفاهيم الاقتصاد الجزئي أو رياضيات الأعمال باللغة العربية:")
+
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
-user_input = st.chat_input("📝 اسأل عن الاقتصاد الجزئي أو الرياضيات للأعمال")
+# Input box
+user_input = st.chat_input("اكتب سؤالك هنا...")
 
+# Display chat
+for msg in st.session_state.chat_history:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
+
+# Process user question
 if user_input:
-    st.session_state.chat_history.append(("user", user_input))
-    response = chat_engine.chat(user_input)
-    st.session_state.chat_history.append(("ai", response.response))
+    st.session_state.chat_history.append({"role": "user", "content": user_input})
+    with st.chat_message("user"):
+        st.markdown(user_input)
 
-# Show conversation
-for role, msg in st.session_state.chat_history:
-    if role == "user":
-        st.chat_message("🧑‍🎓").markdown(msg)
-    else:
-        st.chat_message("🤖").markdown(msg)
+    with st.chat_message("assistant"):
+        with st.spinner("أفكر في الإجابة..."):
+            response = chat_engine.chat(user_input)
+            st.markdown(response.response)
+            st.session_state.chat_history.append({"role": "assistant", "content": response.response})
