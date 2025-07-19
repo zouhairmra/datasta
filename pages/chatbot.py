@@ -20,7 +20,7 @@ def initialize_chat_engine():
     # Local LLM from Ollama
     llm = Ollama(model="llama3")
 
-    # Mini knowledge base for Microeconomics/Business Math (you can expand this)
+    # Mini knowledge base
     content = """
     الاقتصاد الجزئي هو فرع من فروع الاقتصاد يركز على سلوك الأفراد والشركات في اتخاذ القرارات بشأن تخصيص الموارد. من مفاهيمه: العرض والطلب، توازن السوق، مرونة الأسعار، وتكاليف الإنتاج.
 
@@ -31,13 +31,13 @@ def initialize_chat_engine():
     parser = SimpleNodeParser()
     nodes = parser.get_nodes_from_documents(documents)
 
-    index = VectorStoreIndex(nodes)
-    memory = ChatMemoryBuffer.from_defaults(token_limit=1500)
-
     service_context = ServiceContext.from_defaults(
         llm=llm,
         embed_model=embed_model
     )
+
+    index = VectorStoreIndex(nodes, service_context=service_context)
+    memory = ChatMemoryBuffer.from_defaults(token_limit=1500)
 
     return CondenseQuestionChatEngine.from_defaults(
         index=index,
