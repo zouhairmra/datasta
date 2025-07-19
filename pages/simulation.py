@@ -1,36 +1,45 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
+import openai
 
-st.set_page_config(page_title="Simulation Center", layout="wide")
+# Set page config
+st.set_page_config(page_title="Economic Simulation Center", layout="wide")
 
-# Title
-st.title("📊 Economic Simulation Center")
+# Securely load your OpenAI API key from Streamlit secrets
+openai.api_key = st.secrets["openai"]["api_key"]  # Make sure you set this in your secrets.toml
 
-# Translation toggle
+# Translation helper
 language = st.radio("🌐 Choose Language / اختر اللغة", ["English", "العربية"])
 
-def translate(text_en, text_ar):
-    return text_ar if language == "العربية" else text_en
+def translate(en, ar):
+    return ar if language == "العربية" else en
 
-# Sidebar Section navigation
+st.title(translate("📊 Economic Simulation Center", "📊 مركز محاكاة الاقتصاد"))
+
+# Sidebar navigation
 section = st.sidebar.selectbox(
     translate("Choose Section", "اختر القسم"),
-    [translate("Microeconomics Simulations", "محاكاة الاقتصاد الجزئي"),
-     translate("Business Math Concepts", "مفاهيم الرياضيات للأعمال"),
-     translate("AI Assistant", "المساعد الذكي")]
+    [
+        translate("Microeconomics Simulations", "محاكاة الاقتصاد الجزئي"),
+        translate("Business Math Concepts", "مفاهيم الرياضيات للأعمال"),
+        translate("AI Assistant", "المساعد الذكي")
+    ]
 )
 
-# Microeconomics Simulations
+# --- Microeconomics simulations ---
 if section == translate("Microeconomics Simulations", "محاكاة الاقتصاد الجزئي"):
+
     topic = st.sidebar.radio(
         translate("Choose Topic", "اختر الموضوع"),
-        [translate("Supply and Demand", "العرض والطلب"),
-         translate("Elasticities", "المرونات"),
-         translate("Production & Costs", "الإنتاج والتكاليف"),
-         translate("Oligopoly (Game Theory)", "احتكار القلة (نظرية الألعاب)"),
-         translate("Competitive Market", "السوق التنافسي"),
-         translate("Monopolistic Competition", "المنافسة الاحتكارية")]
+        [
+            translate("Supply and Demand", "العرض والطلب"),
+            translate("Elasticities", "المرونات"),
+            translate("Production & Costs", "الإنتاج والتكاليف"),
+            translate("Oligopoly (Game Theory)", "احتكار القلة (نظرية الألعاب)"),
+            translate("Competitive Market", "السوق التنافسي"),
+            translate("Monopolistic Competition", "المنافسة الاحتكارية"),
+        ]
     )
 
     if topic == translate("Supply and Demand", "العرض والطلب"):
@@ -112,25 +121,70 @@ if section == translate("Microeconomics Simulations", "محاكاة الاقتص
             "تقوم شركتا بوينغ وإيرباص بتقييد الإنتاج للحفاظ على الأسعار مرتفعة، تمامًا كما يوضح نموذج كورنو."
         ))
 
-# AI Assistant Section
+# --- Business Math Concepts ---
+elif section == translate("Business Math Concepts", "مفاهيم الرياضيات للأعمال"):
+
+    topic = st.sidebar.radio(
+        translate("Choose Concept", "اختر المفهوم"),
+        [
+            translate("Cost Minimization", "تقليل التكلفة"),
+            translate("Profit Maximization", "تعظيم الربح"),
+            translate("Marginal Analysis", "التحليل الحدي"),
+        ]
+    )
+
+    if topic == translate("Cost Minimization", "تقليل التكلفة"):
+        st.header(translate("Cost Minimization Example", "مثال تقليل التكلفة"))
+        labor = st.slider(translate("Labor (hrs)", "العمل بالساعات"), 1, 100, 50)
+        capital = st.slider(translate("Capital ($)", "رأس المال"), 100, 1000, 500)
+        cost = labor * 20 + capital * 0.5
+        st.metric(translate("Total Cost", "التكلفة الإجمالية"), cost)
+
+    elif topic == translate("Profit Maximization", "تعظيم الربح"):
+        st.header(translate("Profit Maximization Example", "مثال تعظيم الربح"))
+        price = st.slider(translate("Price per Unit", "السعر للوحدة"), 0.5, 10.0, 2.0)
+        cost = st.slider(translate("Cost per Unit", "التكلفة للوحدة"), 0.1, 5.0, 1.0)
+        quantity = st.slider(translate("Quantity Sold", "الكمية المباعة"), 0, 1000, 300)
+        profit = (price - cost) * quantity
+        st.metric(translate("Profit", "الربح"), profit)
+
+    elif topic == translate("Marginal Analysis", "التحليل الحدي"):
+        st.header(translate("Marginal Revenue vs Marginal Cost", "الإيراد الحدي مقابل التكلفة الحدية"))
+        q = st.slider(translate("Quantity", "الكمية"), 1, 100, 10)
+        MR = 100 - 2 * q
+        MC = 20 + q
+        st.metric(translate("Marginal Revenue", "الإيراد الحدي"), MR)
+        st.metric(translate("Marginal Cost", "التكلفة الحدية"), MC)
+
+        if abs(MR - MC) < 5:
+            st.success(translate("Near Profit Maximization", "نحو تعظيم الربح"))
+
+# --- AI Assistant Section ---
 elif section == translate("AI Assistant", "المساعد الذكي"):
+
     st.header(translate("Ask the AI Assistant", "اسأل المساعد الذكي"))
 
-    user_question = st.text_area(translate("Ask any question related to microeconomics or business math.",
-                                           "اطرح أي سؤال متعلق بالاقتصاد الجزئي أو الرياضيات للأعمال."))
+    user_question = st.text_area(translate(
+        "Ask any question related to microeconomics or business math.",
+        "اطرح أي سؤال متعلق بالاقتصاد الجزئي أو الرياضيات للأعمال."
+    ))
+
     if user_question:
         with st.spinner(translate("Thinking...", "جارٍ التفكير...")):
-            import openai
-            import os
-            
-            openai.api_key = os.getenv("OPENAI_API_KEY")
+            try:
+                response = openai.ChatCompletion.create(
+                    model="gpt-4",
+                    messages=[
+                        {"role": "system", "content": "You are an expert assistant helping Arabic-speaking students understand microeconomics and business mathematics. Use simple examples and explain clearly."},
+                        {"role": "user", "content": user_question}
+                    ],
+                    temperature=0.7,
+                    max_tokens=1000,
+                    n=1,
+                    stop=None,
+                )
+                answer = response.choices[0].message.content
+                st.success(answer)
 
-            response = openai.ChatCompletion.create(
-                model="gpt-4",
-                messages=[
-                    {"role": "system", "content": "You are an expert assistant helping Arabic-speaking students understand microeconomics and business mathematics. Use simple examples and explain clearly."},
-                    {"role": "user", "content": user_question}
-                ]
-            )
-
-            st.success(response.choices[0].message.content)
+            except Exception as e:
+                st.error(f"Error communicating with OpenAI API: {e}")
