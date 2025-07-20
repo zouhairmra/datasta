@@ -1,31 +1,31 @@
-# pages/chatbot.py
 import streamlit as st
+from llama_cpp import Llama
 
-st.set_page_config(page_title="Simple Chatbot", page_icon="💬")
-st.title("🤖 Simple Rule-Based Chatbot")
+# Load the local Phi-3 model (adjust the path if needed)
+MODEL_PATH = "models/phi-3-mini-4k-instruct.Q4_0.gguf"
 
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = []
+@st.cache_resource
+def load_model():
+    return Llama(
+        model_path=MODEL_PATH,
+        n_ctx=2048,
+        n_threads=4,  # adjust depending on your CPU
+        n_gpu_layers=0  # set >0 if you want to use GPU acceleration
+    )
 
-def rule_based_response(user_input):
-    user_input = user_input.lower()
-    if "hello" in user_input:
-        return "Hi there! 👋"
-    elif "how are you" in user_input:
-        return "I'm doing great, thanks!"
-    elif "bye" in user_input:
-        return "Goodbye! Have a nice day 😊"
-    else:
-        return "I'm just a simple bot. Ask me something like 'hello', 'how are you', or 'bye'."
+llm = load_model()
 
-# Chat UI
-user_input = st.chat_input("Say something...")
+st.title("🧠 Local AI Chatbot (Phi-3)")
+st.write("Ask any question below (runs offline, no API key required).")
+
+user_input = st.text_input("You:", key="input")
+
 if user_input:
-    st.session_state.chat_history.append(("user", user_input))
-    response = rule_based_response(user_input)
-    st.session_state.chat_history.append(("bot", response))
-
-# Show chat history
-for speaker, message in st.session_state.chat_history:
-    with st.chat_message("user" if speaker == "user" else "assistant"):
-        st.markdown(message)
+    with st.spinner("Thinking..."):
+        response = llm(
+            f"<|system|>You are a helpful assistant.<|user|>{user_input}<|assistant|>",
+            max_tokens=512,
+            stop=["<|user|>", "<|assistant|>"]
+        )
+        output = response["choices"][0]["text"]
+        st.markdown(f"**Bot:** {output.strip()}")
