@@ -1,8 +1,6 @@
 import streamlit as st
 from llama_cpp import Llama
 
-# Load the local Phi-3 model (adjust the path if needed)
-MODEL_PATH = "models/phi-3-mini-4k-instruct.Q4_0.gguf"
 
 @st.cache_resource
 def load_model():
