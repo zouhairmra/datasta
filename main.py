@@ -56,5 +56,4 @@ else:
         - 📉 Forecast with Time Series & Machine Learning
         - 🌍 Connect to World Bank datasets
         """)
-    elif menu == "ML Task":
-        if menu == "ML Task":
+ 
