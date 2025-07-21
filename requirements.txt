@@ -11,3 +11,7 @@ requests
 PyYAML
 bcrypt
 wbdata
+shap
+sqlalchemy
+joblib
+ 
