@@ -14,4 +14,5 @@ wbdata
 shap
 sqlalchemy
 joblib
- 
+ xgboost
+psycopg2-binary
