@@ -53,7 +53,11 @@ if uploaded_file:
 
             st.subheader("📊 Evaluation Results")
             if problem_type == "regression":
-                st.write(f"RMSE: {mean_squared_error(y_test, y_pred, squared=False):.2f}")
+                import numpy as np
+mse = mean_squared_error(y_test, y_pred)
+rmse = np.sqrt(mse)
+st.write(f"RMSE: {rmse:.2f}")
+
             else:
                 st.write(f"Accuracy: {accuracy_score(y_test, y_pred):.2f}")
 
