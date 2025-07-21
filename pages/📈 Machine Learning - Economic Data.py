@@ -27,7 +27,10 @@ if uploaded_file:
 
         st.subheader("🔍 Results")
         st.write(f"R² score: {r2_score(y_test, y_pred):.2f}")
-        st.write(f"RMSE: {mean_squared_error(y_test, y_pred, squared=False):.2f}")
+        import numpy as np
+rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+st.write(f"RMSE: {rmse:.2f}")
+
 
         st.subheader("📊 Coefficients")
         coeff_df = pd.DataFrame({"Feature": features, "Coefficient": model.coef_})
