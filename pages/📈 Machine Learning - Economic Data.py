@@ -10,50 +10,23 @@ import joblib
 import matplotlib.pyplot as plt
 import seaborn as sns
 import sqlite3
-from datetime import datetime
 
 st.set_page_config(page_title="📈 Machine Learning - Economic Data", layout="wide")
 st.title("📈 Machine Learning on Economic Data")
 
-# Configurable DB path
-DB_PATH = "ml_models.db"
-
-# Function to initialize DB and tables
-def init_db():
-    try:
-        conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
-        # Table for model metrics
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS model_metrics (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                target TEXT,
-                features TEXT,
-                problem_type TEXT,
-                metric_value REAL,
-                timestamp TEXT
-            )
-        """)
-        # Table for app usage stats (optional)
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS app_usage (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                page TEXT,
-                visit_time TEXT
-            )
-        """)
-        conn.commit()
-        return conn, cursor
-    except sqlite3.Error as e:
-        st.error(f"Database error: {e}")
-        return None, None
-
-conn, cursor = init_db()
-
-# Record page visit
-if cursor:
-    with conn:
-        cursor.execute("INSERT INTO app_usage (page, visit_time) VALUES (?, ?)", ("Machine Learning - Economic Data", datetime.now().isoformat()))
+# Connect to SQLite DB and create table if not exists
+conn = sqlite3.connect("ml_models.db")
+cursor = conn.cursor()
+cursor.execute("""
+    CREATE TABLE IF NOT EXISTS model_metrics (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        target TEXT,
+        features TEXT,
+        problem_type TEXT,
+        metric_value REAL,
+        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+""")
 
 uploaded_file = st.file_uploader("Upload a CSV file", type="csv")
 
@@ -88,9 +61,9 @@ if uploaded_file:
             X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size / 100, random_state=42)
 
             if problem_type == "regression":
-                model = RandomForestRegressor(random_state=42)
+                model = RandomForestRegressor()
             else:
-                model = RandomForestClassifier(random_state=42)
+                model = RandomForestClassifier()
 
             model.fit(X_train, y_train)
             y_pred = model.predict(X_test)
@@ -106,13 +79,12 @@ if uploaded_file:
                 st.write(f"Accuracy: {acc:.2f}")
                 metric_value = acc
 
-            # Save to DB safely
-            if cursor:
-                with conn:
-                    cursor.execute(
-                        "INSERT INTO model_metrics (target, features, problem_type, metric_value, timestamp) VALUES (?, ?, ?, ?, ?)",
-                        (target, ','.join(selected_features), problem_type, metric_value, datetime.now().isoformat())
-                    )
+            # Save to DB
+            cursor.execute(
+                "INSERT INTO model_metrics (target, features, problem_type, metric_value) VALUES (?, ?, ?, ?)",
+                (target, ','.join(selected_features), problem_type, metric_value)
+            )
+            conn.commit()
 
             # Charts
             st.subheader("📈 Feature Importance")
@@ -127,6 +99,7 @@ if uploaded_file:
             explainer = shap.TreeExplainer(model)
             shap_values = explainer.shap_values(X_test)
 
+            # Create matplotlib figure for SHAP summary plot
             fig_shap = plt.figure()
             shap.summary_plot(shap_values, X_test, show=False, plot_type="bar")
             st.pyplot(fig_shap)
@@ -152,25 +125,3 @@ if uploaded_file:
             if st.button("Submit Guess"):
                 st.success(f"Actual: {actual}, Your guess: {guess}")
                 st.write(f"Error: {abs(guess - actual):.2f}")
-
-# Option to view saved metrics
-if cursor:
-    st.sidebar.markdown("---")
-    st.sidebar.subheader("📂 Past Model Metrics")
-    view_metrics = st.sidebar.checkbox("Show saved model metrics")
-    if view_metrics:
-        cursor.execute("SELECT id, target, features, problem_type, metric_value, timestamp FROM model_metrics ORDER BY timestamp DESC LIMIT 10")
-        rows = cursor.fetchall()
-        if rows:
-            metrics_df = pd.DataFrame(rows, columns=["ID", "Target", "Features", "Problem Type", "Metric", "Timestamp"])
-            st.sidebar.dataframe(metrics_df)
-        else:
-            st.sidebar.write("No saved model metrics yet.")
-
-# Close DB connection on exit
-def close_connection():
-    if conn:
-        conn.close()
-
-st.experimental_singleton.clear()
-st.on_event("shutdown", close_connection)
