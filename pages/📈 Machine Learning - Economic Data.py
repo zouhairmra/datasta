@@ -80,8 +80,10 @@ if uploaded_file:
                 metric_value = acc
 
             # Save to DB
-            cursor.execute("INSERT INTO model_metrics (target, features, problem_type, metric_value) VALUES (?, ?, ?, ?)",
-                           (target, ','.join(selected_features), problem_type, metric_value))
+            cursor.execute(
+                "INSERT INTO model_metrics (target, features, problem_type, metric_value) VALUES (?, ?, ?, ?)",
+                (target, ','.join(selected_features), problem_type, metric_value)
+            )
             conn.commit()
 
             # Charts
@@ -96,10 +98,11 @@ if uploaded_file:
             st.subheader("🔍 Model Interpretability (SHAP)")
             explainer = shap.TreeExplainer(model)
             shap_values = explainer.shap_values(X_test)
-            st.set_option('deprecation.showPyplotGlobalUse', False)
-            st.write("SHAP Summary Plot:")
-            shap.summary_plot(shap_values, X_test, plot_type="bar")
-            st.pyplot(bbox_inches='tight')
+
+            # Create matplotlib figure for SHAP summary plot
+            fig_shap = plt.figure()
+            shap.summary_plot(shap_values, X_test, show=False, plot_type="bar")
+            st.pyplot(fig_shap)
 
             if st.checkbox("📊 Run cross-validation"):
                 k = st.slider("Number of folds", 2, 10, 5)
