@@ -178,35 +178,71 @@ if section == translate("Microeconomics Simulations", "محاكاة الاقتص
 
 # --- AI Assistant ---
 elif section == translate("AI Assistant", "المساعد الذكي"):
+    import plotly.graph_objs as go
+
     st.header(translate("Ask the AI Assistant", "اسأل المساعد الذكي"))
 
     user_question = st.text_area(translate("Ask any question related to microeconomics or business math.",
                                            "اطرح أي سؤال متعلق بالاقتصاد الجزئي أو الرياضيات للأعمال."))
 
+    # Define topic dictionary
+    topics = {
+        "elasticity": {
+            "keywords": ["elasticity", "مرونة"],
+            "en": "Elasticity measures how much quantity demanded or supplied changes when the price changes. For example, if a 10% increase in price causes a 20% drop in demand, the price elasticity is -2.",
+            "ar": "تقيس المرونة مقدار تغير الكمية المطلوبة أو المعروضة عند تغير السعر. على سبيل المثال، إذا أدت زيادة بنسبة 10٪ في السعر إلى انخفاض بنسبة 20٪ في الطلب، فإن المرونة السعرية هي -2.",
+            "show_chart": True
+        },
+        "supply_demand": {
+            "keywords": ["supply", "demand", "العرض", "الطلب"],
+            "en": "Supply is the quantity producers are willing to sell at a given price, while demand is the quantity consumers are willing to buy. The intersection determines the market price.",
+            "ar": "العرض هو كمية السلع التي يرغب المنتجون في بيعها عند سعر معين، بينما الطلب هو كمية السلع التي يرغب المستهلكون في شرائها. يتحدد السعر في السوق عند تقاطع العرض والطلب.",
+            "show_chart": False
+        },
+        "cost": {
+            "keywords": ["cost", "التكلفة"],
+            "en": "Total cost is the sum of fixed and variable costs. Marginal cost is the change in total cost from producing one more unit.",
+            "ar": "التكلفة الإجمالية هي مجموع التكاليف الثابتة والمتغيرة. التكلفة الحدية هي التغير في التكلفة الإجمالية عند إنتاج وحدة إضافية.",
+            "show_chart": False
+        }
+    }
+
     if user_question:
         with st.spinner(translate("Thinking...", "جارٍ التفكير...")):
-            answer = ""
             question_lower = user_question.lower()
+            matched_topic = None
 
-            if "elasticity" in question_lower or "مرونة" in user_question:
-                answer = translate(
-                    "Elasticity measures how much quantity demanded or supplied changes when the price changes. For example, if a 10% increase in price causes a 20% drop in demand, the price elasticity is -2.",
-                    "تقيس المرونة مقدار تغير الكمية المطلوبة أو المعروضة عند تغير السعر. على سبيل المثال، إذا أدت زيادة بنسبة 10٪ في السعر إلى انخفاض بنسبة 20٪ في الطلب، فإن المرونة السعرية هي -2."
-                )
-            elif "supply" in question_lower or "demand" in question_lower or "العرض" in user_question or "الطلب" in user_question:
-                answer = translate(
-                    "Supply is the quantity producers are willing to sell at a given price, while demand is the quantity consumers are willing to buy. The intersection determines the market price.",
-                    "العرض هو كمية السلع التي يرغب المنتجون في بيعها عند سعر معين، بينما الطلب هو كمية السلع التي يرغب المستهلكون في شرائها. يتحدد السعر في السوق عند تقاطع العرض والطلب."
-                )
-            elif "cost" in question_lower or "التكلفة" in user_question:
-                answer = translate(
-                    "Total cost is the sum of fixed and variable costs. Marginal cost is the change in total cost from producing one more unit.",
-                    "التكلفة الإجمالية هي مجموع التكاليف الثابتة والمتغيرة. التكلفة الحدية هي التغير في التكلفة الإجمالية عند إنتاج وحدة إضافية."
-                )
+            # Match question to topic
+            for key, info in topics.items():
+                if any(word in question_lower for word in info["keywords"]):
+                    matched_topic = key
+                    break
+
+            if matched_topic:
+                content = topics[matched_topic]
+                answer = translate(content["en"], content["ar"])
+                st.success(answer)
+
+                # Optional chart
+                if content["show_chart"] and matched_topic == "elasticity":
+                    fig = go.Figure()
+                    fig.add_trace(go.Scatter(
+                        x=[10, 11],
+                        y=[100, 80],
+                        mode="lines+markers",
+                        name="Demand Curve"
+                    ))
+                    fig.update_layout(
+                        title=translate("Elasticity Example: Demand drops as Price increases",
+                                        "مثال على المرونة: انخفاض الطلب مع ارتفاع السعر"),
+                        xaxis_title=translate("Price", "السعر"),
+                        yaxis_title=translate("Quantity Demanded", "الكمية المطلوبة"),
+                        template="plotly_white"
+                    )
+                    st.plotly_chart(fig, use_container_width=True)
             else:
-                answer = translate(
+                st.warning(translate(
                     "Sorry, I currently only answer questions about elasticity, supply/demand, and cost. More features coming soon!",
                     "عذرًا، يمكنني حالياً الإجابة فقط على الأسئلة المتعلقة بالمرونة، العرض والطلب، والتكلفة. المزيد من الميزات قريباً!"
-                )
+                ))
 
-        st.success(answer)
