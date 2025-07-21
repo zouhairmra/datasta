@@ -57,4 +57,4 @@ else:
         - 🌍 Connect to World Bank datasets
         """)
     elif menu == "ML Task":
-        st.switch_page("pages/ml_task.py")
+        if menu == "ML Task":
