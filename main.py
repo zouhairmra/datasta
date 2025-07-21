@@ -33,7 +33,7 @@ if not st.session_state.logged_in:
         if check_password(username, password):
             st.session_state.logged_in = True
             st.session_state.username = username
-            st.session_state.name = username  # or use a dict for nicer names
+            st.session_state.name = username
             st.success(f"Welcome {st.session_state.name}!")
         else:
             st.error("❌ Incorrect username or password")
@@ -41,14 +41,20 @@ else:
     st.sidebar.button("Logout", on_click=lambda: st.session_state.update(logged_in=False, username=None, name=None))
     st.title(f"📊 Welcome, {st.session_state.name}!")
 
-    st.markdown("""
-    **DataStatPro** helps you upload, explore, and analyze economic & financial data easily.
+    # Main menu
+    st.sidebar.title("📚 Navigation")
+    menu = st.sidebar.radio("Go to", ["Home", "ML Task"])
 
-    **Features:**
-    - 📥 Upload your dataset
-    - 📈 Perform Exploratory Data Analysis
-    - 🔍 Run Econometric Models
-    - 📉 Forecast with Time Series & Machine Learning
-    - 🌍 Connect to World Bank datasets
-    """)
+    if menu == "Home":
+        st.markdown("""
+        **DataStatPro** helps you upload, explore, and analyze economic & financial data easily.
 
+        **Features:**
+        - 📥 Upload your dataset
+        - 📈 Perform Exploratory Data Analysis
+        - 🔍 Run Econometric Models
+        - 📉 Forecast with Time Series & Machine Learning
+        - 🌍 Connect to World Bank datasets
+        """)
+    elif menu == "ML Task":
+        st.switch_page("pages/ml_task.py")
