@@ -195,14 +195,74 @@ elif section == translate("AI Assistant", "المساعد الذكي"):
         },
         "supply_demand": {
             "keywords": ["supply", "demand", "العرض", "الطلب"],
-            "en": "Supply is the quantity producers are willing to sell at a given price, while demand is the quantity consumers are willing to buy. The intersection determines the market price.",
-            "ar": "العرض هو كمية السلع التي يرغب المنتجون في بيعها عند سعر معين، بينما الطلب هو كمية السلع التي يرغب المستهلكون في شرائها. يتحدد السعر في السوق عند تقاطع العرض والطلب.",
+            "en": "Supply is what producers offer at various prices; demand is what consumers want to buy. Their intersection determines equilibrium price.",
+            "ar": "العرض هو ما يقدمه المنتجون عند أسعار مختلفة؛ الطلب هو ما يرغب المستهلكون في شرائه. يتحدد السعر التوازني عند تقاطع العرض والطلب.",
             "show_chart": False
         },
         "cost": {
             "keywords": ["cost", "التكلفة"],
-            "en": "Total cost is the sum of fixed and variable costs. Marginal cost is the change in total cost from producing one more unit.",
-            "ar": "التكلفة الإجمالية هي مجموع التكاليف الثابتة والمتغيرة. التكلفة الحدية هي التغير في التكلفة الإجمالية عند إنتاج وحدة إضافية.",
+            "en": "Total cost includes fixed and variable costs. Marginal cost is the cost of producing one more unit.",
+            "ar": "تشمل التكلفة الإجمالية التكاليف الثابتة والمتغيرة. التكلفة الحدية هي تكلفة إنتاج وحدة إضافية.",
+            "show_chart": False
+        },
+        "market_structure": {
+            "keywords": ["monopoly", "oligopoly", "perfect competition", "structure", "احتكار", "سوق", "منافسة"],
+            "en": "Market structures include perfect competition, monopolistic competition, oligopoly, and monopoly. Each differs in terms of number of firms, barriers to entry, and price control.",
+            "ar": "تشمل هياكل السوق: المنافسة الكاملة، والمنافسة الاحتكارية، والاحتكار القلّي، والاحتكار. تختلف كل منها في عدد الشركات وحواجز الدخول والسيطرة على الأسعار.",
+            "show_chart": False
+        },
+        "opportunity_cost": {
+            "keywords": ["opportunity cost", "تكلفة الفرصة"],
+            "en": "Opportunity cost is the value of the next best alternative you give up when making a choice.",
+            "ar": "تكلفة الفرصة البديلة هي قيمة أفضل بديل تم التخلي عنه عند اتخاذ قرار.",
+            "show_chart": False
+        },
+        "inflation": {
+            "keywords": ["inflation", "تضخم"],
+            "en": "Inflation is the general increase in prices over time. It reduces purchasing power.",
+            "ar": "التضخم هو الارتفاع العام في الأسعار مع مرور الوقت، مما يقلل من القوة الشرائية.",
+            "show_chart": False
+        },
+        "gdp": {
+            "keywords": ["gdp", "gross domestic product", "الناتج المحلي", "الناتج الإجمالي"],
+            "en": "GDP measures the total market value of all final goods and services produced in a country in a given period.",
+            "ar": "يقيس الناتج المحلي الإجمالي القيمة السوقية لجميع السلع والخدمات النهائية المنتجة في بلد ما خلال فترة زمنية معينة.",
+            "show_chart": False
+        },
+        "profit_max": {
+            "keywords": ["profit", "maximize", "الربح", "تعظيم"],
+            "en": "Firms maximize profit where marginal cost equals marginal revenue (MC = MR).",
+            "ar": "تقوم الشركات بتعظيم الربح عندما تتساوى التكلفة الحدية مع الإيراد الحدي (MC = MR).",
+            "show_chart": False
+        },
+        "game_theory": {
+            "keywords": ["game theory", "نظريه الالعاب"],
+            "en": "Game theory analyzes strategic interactions where outcomes depend on actions of multiple agents.",
+            "ar": "تحلل نظرية الألعاب التفاعلات الاستراتيجية حيث تعتمد النتائج على تصرفات العديد من الأطراف.",
+            "show_chart": False
+        },
+        "consumer_choice": {
+            "keywords": ["utility", "consumer", "choice", "مستهلك", "المنفعة", "اختيار"],
+            "en": "Consumer choice theory explains how individuals allocate income to maximize utility given prices and preferences.",
+            "ar": "تشرح نظرية اختيار المستهلك كيف يوزع الأفراد دخلهم لتعظيم المنفعة في ظل الأسعار والتفضيلات.",
+            "show_chart": False
+        },
+        "externalities": {
+            "keywords": ["externality", "externalities", "الآثار الخارجية", "التلوث", "الضرر"],
+            "en": "Externalities are side effects of economic activity. Negative ones like pollution harm third parties.",
+            "ar": "الآثار الخارجية هي نتائج جانبية للنشاط الاقتصادي. مثلًا، التلوث هو أثر خارجي سلبي يضر بأطراف ثالثة.",
+            "show_chart": False
+        },
+        "production_function": {
+            "keywords": ["production", "function", "إنتاج", "دالة الإنتاج"],
+            "en": "The production function shows the relationship between inputs (labor, capital) and output.",
+            "ar": "توضح دالة الإنتاج العلاقة بين المدخلات (العمل، رأس المال) والمخرجات.",
+            "show_chart": False
+        },
+        "price_control": {
+            "keywords": ["price ceiling", "price floor", "سقف سعري", "حد أدنى للسعر"],
+            "en": "Price ceilings are max legal prices (can cause shortages); price floors are minimum prices (can cause surpluses).",
+            "ar": "السقوف السعرية هي أعلى أسعار قانونية (قد تؤدي إلى نقص)، والحد الأدنى للأسعار قد يؤدي إلى فائض.",
             "show_chart": False
         }
     }
@@ -212,7 +272,6 @@ elif section == translate("AI Assistant", "المساعد الذكي"):
             question_lower = user_question.lower()
             matched_topic = None
 
-            # Match question to topic
             for key, info in topics.items():
                 if any(word in question_lower for word in info["keywords"]):
                     matched_topic = key
@@ -223,15 +282,10 @@ elif section == translate("AI Assistant", "المساعد الذكي"):
                 answer = translate(content["en"], content["ar"])
                 st.success(answer)
 
-                # Optional chart
+                # Optional chart for elasticity
                 if content["show_chart"] and matched_topic == "elasticity":
                     fig = go.Figure()
-                    fig.add_trace(go.Scatter(
-                        x=[10, 11],
-                        y=[100, 80],
-                        mode="lines+markers",
-                        name="Demand Curve"
-                    ))
+                    fig.add_trace(go.Scatter(x=[10, 11], y=[100, 80], mode="lines+markers", name="Demand Curve"))
                     fig.update_layout(
                         title=translate("Elasticity Example: Demand drops as Price increases",
                                         "مثال على المرونة: انخفاض الطلب مع ارتفاع السعر"),
@@ -242,7 +296,6 @@ elif section == translate("AI Assistant", "المساعد الذكي"):
                     st.plotly_chart(fig, use_container_width=True)
             else:
                 st.warning(translate(
-                    "Sorry, I currently only answer questions about elasticity, supply/demand, and cost. More features coming soon!",
-                    "عذرًا، يمكنني حالياً الإجابة فقط على الأسئلة المتعلقة بالمرونة، العرض والطلب، والتكلفة. المزيد من الميزات قريباً!"
+                    "Sorry, I currently only answer selected microeconomics topics. More features coming soon!",
+                    "عذرًا، يمكنني حاليًا الإجابة فقط على مواضيع معينة في الاقتصاد الجزئي. المزيد من الميزات قريباً!"
                 ))
-
