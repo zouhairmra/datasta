@@ -2,18 +2,19 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
+
 st.set_page_config(page_title="Simulation Center", layout="wide")
 
 # Title
 st.title("📊 Economic Simulation Center")
 
-# Translation toggle
+# Language toggle
 language = st.radio("🌐 Choose Language / اختر اللغة", ["English", "العربية"])
 
 def translate(text_en, text_ar):
     return text_ar if language == "العربية" else text_en
 
-# Sidebar Section navigation
+# Sidebar navigation
 section = st.sidebar.selectbox(
     translate("Choose Section", "اختر القسم"),
     [translate("Microeconomics Simulations", "محاكاة الاقتصاد الجزئي"),
@@ -21,7 +22,7 @@ section = st.sidebar.selectbox(
      translate("AI Assistant", "المساعد الذكي")]
 )
 
-# Microeconomics Simulations
+# --- Microeconomics Simulations ---
 if section == translate("Microeconomics Simulations", "محاكاة الاقتصاد الجزئي"):
     topic = st.sidebar.radio(
         translate("Choose Topic", "اختر الموضوع"),
@@ -111,6 +112,7 @@ if section == translate("Microeconomics Simulations", "محاكاة الاقتص
             "Boeing and Airbus often restrict output to keep prices high, much like the Cournot model shows.",
             "تقوم شركتا بوينغ وإيرباص بتقييد الإنتاج للحفاظ على الأسعار مرتفعة، تمامًا كما يوضح نموذج كورنو."
         ))
+
     elif topic == translate("Competitive Market", "السوق التنافسي"):
         st.header(translate("Competitive Market Simulation", "محاكاة السوق التنافسي"))
 
@@ -119,31 +121,25 @@ if section == translate("Microeconomics Simulations", "محاكاة الاقتص
         quantity = st.slider(translate("Quantity Produced", "الكمية المنتجة"), 1, 100, 10)
 
         profit = (market_price - cost_per_unit) * quantity
-
         st.metric(translate("Profit", "الربح"), profit)
 
-# Interactive Plot with Plotly
-quantities = np.arange(1, 101)
-revenues = market_price * quantities
-costs = cost_per_unit * quantities
+        quantities = np.arange(1, 101)
+        revenues = market_price * quantities
+        costs = cost_per_unit * quantities
 
-fig = go.Figure()
-fig.add_trace(go.Scatter(x=quantities, y=revenues, mode='lines', name=translate("Total Revenue", "الإيراد الكلي"), line=dict(color='green')))
-fig.add_trace(go.Scatter(x=quantities, y=costs, mode='lines', name=translate("Total Cost", "التكلفة الكلية"), line=dict(color='red')))
-fig.add_trace(go.Scatter(x=[quantity], y=[market_price * quantity], mode='markers', name=translate("Chosen Quantity", "الكمية المختارة"), marker=dict(size=10, color='blue')))
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=quantities, y=revenues, mode='lines', name=translate("Total Revenue", "الإيراد الكلي"), line=dict(color='green')))
+        fig.add_trace(go.Scatter(x=quantities, y=costs, mode='lines', name=translate("Total Cost", "التكلفة الكلية"), line=dict(color='red')))
+        fig.add_trace(go.Scatter(x=[quantity], y=[market_price * quantity], mode='markers', name=translate("Chosen Quantity", "الكمية المختارة"), marker=dict(size=10, color='blue')))
 
-fig.update_layout(
-    title=translate("Revenue and Cost in Competitive Market", "الإيراد والتكلفة في السوق التنافسي"),
-    xaxis_title=translate("Quantity", "الكمية"),
-    yaxis_title=translate("Amount", "القيمة"),
-    legend_title=translate("Legend", "المفتاح")
-)
-st.plotly_chart(fig)
-        st.subheader(translate("Real Case: Competitive Agriculture", "حالة واقعية: الزراعة التنافسية"))
-        st.markdown(translate(
-            "In competitive markets like small-scale agriculture, firms are price takers and cannot influence the market price. Their goal is to minimize cost and maximize output.",
-            "في الأسواق التنافسية مثل الزراعة الصغيرة، تكون الشركات متلقية للأسعار ولا يمكنها التأثير على سعر السوق. هدفها هو تقليل التكاليف وتعظيم الإنتاج."
-        ))
+        fig.update_layout(
+            title=translate("Revenue and Cost in Competitive Market", "الإيراد والتكلفة في السوق التنافسي"),
+            xaxis_title=translate("Quantity", "الكمية"),
+            yaxis_title=translate("Amount", "القيمة"),
+            legend_title=translate("Legend", "المفتاح")
+        )
+
+        st.plotly_chart(fig)
 
     elif topic == translate("Monopolistic Competition", "المنافسة الاحتكارية"):
         st.header(translate("Monopolistic Competition Simulation", "محاكاة المنافسة الاحتكارية"))
@@ -155,35 +151,32 @@ st.plotly_chart(fig)
 
         revenue = price * quantity
         total_cost = avg_cost * quantity
-        profit = revenue - total_cost + differentiation * 5  # Bonus for uniqueness
+        profit = revenue - total_cost + differentiation * 5
 
         st.metric(translate("Profit", "الربح"), profit)
-diff_range = np.arange(0, 11)
-profits = [(price * quantity - avg_cost * quantity + d * 5) for d in diff_range]
 
-fig = go.Figure()
-fig.add_trace(go.Scatter(
-    x=diff_range,
-    y=profits,
-    mode='lines+markers',
-    name=translate("Profit", "الربح"),
-    line=dict(color='purple')
-))
+        diff_range = np.arange(0, 11)
+        profits = [(price * quantity - avg_cost * quantity + d * 5) for d in diff_range]
 
-fig.update_layout(
-    title=translate("Profit vs Product Differentiation", "الربح مقابل درجة تميز المنتج"),
-    xaxis_title=translate("Product Differentiation Level", "درجة التميز"),
-    yaxis_title=translate("Profit", "الربح"),
-    legend_title=translate("Legend", "المفتاح")
-)
-
-st.plotly_chart(fig)
-        st.subheader(translate("Real Case: Coffee Shops", "حالة واقعية: المقاهي"))
-        st.markdown(translate(
-            "Coffee shops operate in a monopolistic competition structure. Each tries to stand out (location, taste, atmosphere) while still competing on price.",
-            "تعمل المقاهي في إطار من المنافسة الاحتكارية، حيث تحاول كل منها التميز (بالموقع أو الطعم أو الأجواء) بينما تنافس أيضًا على السعر."
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(
+            x=diff_range,
+            y=profits,
+            mode='lines+markers',
+            name=translate("Profit", "الربح"),
+            line=dict(color='purple')
         ))
-# AI Assistant Section (without OpenAI)
+
+        fig.update_layout(
+            title=translate("Profit vs Product Differentiation", "الربح مقابل درجة تميز المنتج"),
+            xaxis_title=translate("Product Differentiation Level", "درجة التميز"),
+            yaxis_title=translate("Profit", "الربح"),
+            legend_title=translate("Legend", "المفتاح")
+        )
+
+        st.plotly_chart(fig)
+
+# --- AI Assistant ---
 elif section == translate("AI Assistant", "المساعد الذكي"):
     st.header(translate("Ask the AI Assistant", "اسأل المساعد الذكي"))
 
@@ -216,4 +209,4 @@ elif section == translate("AI Assistant", "المساعد الذكي"):
                     "عذرًا، يمكنني حالياً الإجابة فقط على الأسئلة المتعلقة بالمرونة، العرض والطلب، والتكلفة. المزيد من الميزات قريباً!"
                 )
 
-            st.success(answer)
+        st.success(answer)
