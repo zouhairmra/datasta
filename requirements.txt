@@ -10,6 +10,7 @@ altair
 requests
 PyYAML
 bcrypt
+openai
 wbdata
 shap
 sqlalchemy
