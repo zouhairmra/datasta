@@ -21,10 +21,9 @@ if uploaded_file:
     st.subheader("📊 Data Preview")
     st.dataframe(df.head())
 
-    # Drop rows with missing values
     df.dropna(inplace=True)
 
-    # Encode categoricals
+    # Encode categorical variables
     label_encoders = {}
     for col in df.select_dtypes(include=['object']).columns:
         le = LabelEncoder()
@@ -36,66 +35,87 @@ if uploaded_file:
     if len(numeric_cols) < 2:
         st.warning("The dataset must contain at least 2 numeric columns.")
     else:
-        x_var = st.selectbox("Select the input feature (X)", options=numeric_cols)
-        y_var = st.selectbox("Select the target variable (y)", options=[col for col in numeric_cols if col != x_var])
+        target = st.selectbox("🎯 Select the target variable (y)", options=numeric_cols)
+        features = st.multiselect("🧮 Select input features (X)", options=[col for col in numeric_cols if col != target])
 
-        X = df[[x_var]]
-        y = df[y_var]
+        if features:
+            X = df[features]
+            y = df[target]
 
-        # Auto-detect problem type
-        problem_type = "classification" if y.nunique() <= 10 and y.dtype in [np.int64, np.int32] else "regression"
-        st.markdown(f"**Problem Type Detected:** `{problem_type.title()}`")
+            # Auto-detect classification vs regression
+            problem_type = "classification" if y.nunique() <= 10 and y.dtype in [np.int64, np.int32] else "regression"
+            st.markdown(f"**Detected Problem Type:** `{problem_type.title()}`")
 
-        # Model selection
-        if problem_type == "regression":
-            model_name = st.selectbox("Choose a model", ["Linear Regression", "Decision Tree", "Random Forest", "KNN"])
-        else:
-            model_name = st.selectbox("Choose a model", ["Logistic Regression", "Decision Tree", "Random Forest", "KNN"])
-
-        # Train/Test Split
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-        # Model initialization
-        if problem_type == "regression":
-            if model_name == "Linear Regression":
-                model = LinearRegression()
-            elif model_name == "Decision Tree":
-                model = DecisionTreeRegressor()
-            elif model_name == "Random Forest":
-                model = RandomForestRegressor()
+            # Model selection
+            if problem_type == "regression":
+                model_name = st.selectbox("Choose a regression model", ["Linear Regression", "Decision Tree", "Random Forest", "KNN"])
             else:
-                model = KNeighborsRegressor()
-        else:
-            if model_name == "Logistic Regression":
-                model = LogisticRegression()
-            elif model_name == "Decision Tree":
-                model = DecisionTreeClassifier()
-            elif model_name == "Random Forest":
-                model = RandomForestClassifier()
+                model_name = st.selectbox("Choose a classification model", ["Logistic Regression", "Decision Tree", "Random Forest", "KNN"])
+
+            # Train/test split
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+            # Model initialization
+            if problem_type == "regression":
+                if model_name == "Linear Regression":
+                    model = LinearRegression()
+                elif model_name == "Decision Tree":
+                    model = DecisionTreeRegressor()
+                elif model_name == "Random Forest":
+                    model = RandomForestRegressor()
+                else:
+                    model = KNeighborsRegressor()
             else:
-                model = KNeighborsClassifier()
+                if model_name == "Logistic Regression":
+                    model = LogisticRegression(max_iter=1000)
+                elif model_name == "Decision Tree":
+                    model = DecisionTreeClassifier()
+                elif model_name == "Random Forest":
+                    model = RandomForestClassifier()
+                else:
+                    model = KNeighborsClassifier()
 
-        # Train and predict
-        model.fit(X_train, y_train)
-        y_pred = model.predict(X_test)
+            model.fit(X_train, y_train)
+            y_pred = model.predict(X_test)
 
-        st.subheader("📉 Evaluation")
+            st.subheader("📉 Model Evaluation")
+            if problem_type == "regression":
+                rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+                st.write(f"**RMSE:** {rmse:.2f}")
+            else:
+                accuracy = accuracy_score(y_test, y_pred)
+                st.write(f"**Accuracy:** {accuracy * 100:.2f}%")
 
-        if problem_type == "regression":
-            rmse = np.sqrt(mean_squared_error(y_test, y_pred))
-            st.write(f"**RMSE:** {rmse:.2f}")
-        else:
-            acc = accuracy_score(y_test, y_pred)
-            st.write(f"**Accuracy:** {acc*100:.2f}%")
+            # Feature importance (if available)
+            if hasattr(model, "feature_importances_"):
+                st.subheader("🔍 Feature Importance")
+                importance = pd.DataFrame({
+                    "Feature": features,
+                    "Importance": model.feature_importances_
+                }).sort_values(by="Importance", ascending=False)
+                st.dataframe(importance)
 
-        # Optional: Plotting results
-        st.subheader("📈 Prediction Plot")
-        fig, ax = plt.subplots()
-        if problem_type == "regression":
-            sns.scatterplot(x=y_test, y=y_pred, ax=ax)
-            ax.set_xlabel("Actual")
-            ax.set_ylabel("Predicted")
-        else:
-            sns.histplot(y_pred, kde=True, ax=ax)
-            ax.set_xlabel("Predicted Labels")
-        st.pyplot(fig)
+                fig, ax = plt.subplots()
+                sns.barplot(x="Importance", y="Feature", data=importance, ax=ax)
+                st.pyplot(fig)
+
+            elif hasattr(model, "coef_"):
+                st.subheader("📈 Coefficients")
+                coef = pd.DataFrame({
+                    "Feature": features,
+                    "Coefficient": model.coef_.flatten() if model.coef_.ndim > 1 else model.coef_
+                }).sort_values(by="Coefficient", key=abs, ascending=False)
+                st.dataframe(coef)
+
+                fig, ax = plt.subplots()
+                sns.barplot(x="Coefficient", y="Feature", data=coef, ax=ax)
+                st.pyplot(fig)
+
+            # Prediction results preview
+            st.subheader("📋 Predictions vs Actuals")
+            result_df = pd.DataFrame({
+                "Actual": y_test,
+                "Predicted": y_pred
+            }).reset_index(drop=True)
+            st.dataframe(result_df.head())
+
