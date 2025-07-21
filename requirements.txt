@@ -1,17 +1,13 @@
- 
- streamlit
+streamlit
 pandas
-requests
- 
-altair
 numpy
 matplotlib
 seaborn
 scikit-learn
 statsmodels
- wbdata
 plotly
+altair
+requests
 PyYAML
 bcrypt
-
-scikit-learn
+wbdata
