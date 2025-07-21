@@ -113,8 +113,12 @@ if uploaded_file:
             explainer = shap.TreeExplainer(model)
             shap_values = explainer.shap_values(X_test)
             st.write("SHAP Summary Plot:")
-            shap.summary_plot(shap_values, X_test, plot_type="bar", show=False)
-            st.pyplot(bbox_inches='tight')
+            import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots()
+shap.summary_plot(shap_values, X_test, plot_type="bar", show=False, plot_size=(8,6), ax=ax)
+st.pyplot(fig)
+
 
             # Cross Validation
             if st.checkbox("📊 Run cross-validation"):
