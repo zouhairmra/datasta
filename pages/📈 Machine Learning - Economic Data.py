@@ -1,37 +1,34 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import r2_score, mean_squared_error
+from sklearn.metrics import mean_squared_error
 
-st.title("📈 Machine Learning - Economic Data")
+st.title("📈 Machine Learning on Economic Data")
 
-uploaded_file = st.file_uploader("Upload your economic dataset (CSV)", type="csv")
+uploaded_file = st.file_uploader("Upload your CSV file", type=["csv"])
 
 if uploaded_file:
     df = pd.read_csv(uploaded_file)
-    st.write("Preview of dataset:")
-    st.dataframe(df)
+    st.write("Data Preview:", df.head())
 
-    target = st.selectbox("Select the target variable", df.columns)
-    features = st.multiselect("Select feature variables", [col for col in df.columns if col != target])
+    numeric_cols = df.select_dtypes(include=np.number).columns.tolist()
 
-    if st.button("Run Linear Regression") and target and features:
-        X = df[features]
-        y = df[target]
+    if len(numeric_cols) < 2:
+        st.warning("You need at least 2 numeric columns to proceed.")
+    else:
+        x_var = st.selectbox("Select feature (X)", options=numeric_cols)
+        y_var = st.selectbox("Select target (y)", options=[col for col in numeric_cols if col != x_var])
+
+        X = df[[x_var]]
+        y = df[y_var]
 
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
         model = LinearRegression()
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
 
-        st.subheader("🔍 Results")
-        st.write(f"R² score: {r2_score(y_test, y_pred):.2f}")
-        import numpy as np
-rmse = np.sqrt(mean_squared_error(y_test, y_pred))
-st.write(f"RMSE: {rmse:.2f}")
-
-
-        st.subheader("📊 Coefficients")
-        coeff_df = pd.DataFrame({"Feature": features, "Coefficient": model.coef_})
-        st.dataframe(coeff_df)
+        rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+        st.write(f"**RMSE:** {rmse:.2f}")
