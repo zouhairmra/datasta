@@ -111,7 +111,42 @@ if section == translate("Microeconomics Simulations", "محاكاة الاقتص
             "Boeing and Airbus often restrict output to keep prices high, much like the Cournot model shows.",
             "تقوم شركتا بوينغ وإيرباص بتقييد الإنتاج للحفاظ على الأسعار مرتفعة، تمامًا كما يوضح نموذج كورنو."
         ))
+    elif topic == translate("Competitive Market", "السوق التنافسي"):
+        st.header(translate("Competitive Market Simulation", "محاكاة السوق التنافسي"))
 
+        market_price = st.slider(translate("Market Price", "سعر السوق"), 1, 100, 50)
+        cost_per_unit = st.number_input(translate("Cost per Unit", "التكلفة لكل وحدة"), value=30)
+        quantity = st.slider(translate("Quantity Produced", "الكمية المنتجة"), 1, 100, 10)
+
+        profit = (market_price - cost_per_unit) * quantity
+
+        st.metric(translate("Profit", "الربح"), profit)
+
+        st.subheader(translate("Real Case: Competitive Agriculture", "حالة واقعية: الزراعة التنافسية"))
+        st.markdown(translate(
+            "In competitive markets like small-scale agriculture, firms are price takers and cannot influence the market price. Their goal is to minimize cost and maximize output.",
+            "في الأسواق التنافسية مثل الزراعة الصغيرة، تكون الشركات متلقية للأسعار ولا يمكنها التأثير على سعر السوق. هدفها هو تقليل التكاليف وتعظيم الإنتاج."
+        ))
+
+    elif topic == translate("Monopolistic Competition", "المنافسة الاحتكارية"):
+        st.header(translate("Monopolistic Competition Simulation", "محاكاة المنافسة الاحتكارية"))
+
+        price = st.slider(translate("Product Price", "سعر المنتج"), 1, 100, 50)
+        avg_cost = st.number_input(translate("Average Cost", "التكلفة المتوسطة"), value=40)
+        quantity = st.slider(translate("Quantity Sold", "الكمية المباعة"), 1, 100, 10)
+        differentiation = st.slider(translate("Product Differentiation Level", "درجة تميز المنتج"), 0, 10, 5)
+
+        revenue = price * quantity
+        total_cost = avg_cost * quantity
+        profit = revenue - total_cost + differentiation * 5  # Bonus for uniqueness
+
+        st.metric(translate("Profit", "الربح"), profit)
+
+        st.subheader(translate("Real Case: Coffee Shops", "حالة واقعية: المقاهي"))
+        st.markdown(translate(
+            "Coffee shops operate in a monopolistic competition structure. Each tries to stand out (location, taste, atmosphere) while still competing on price.",
+            "تعمل المقاهي في إطار من المنافسة الاحتكارية، حيث تحاول كل منها التميز (بالموقع أو الطعم أو الأجواء) بينما تنافس أيضًا على السعر."
+        ))
 # AI Assistant Section (without OpenAI)
 elif section == translate("AI Assistant", "المساعد الذكي"):
     st.header(translate("Ask the AI Assistant", "اسأل المساعد الذكي"))
