@@ -3,7 +3,7 @@ pandas
 numpy
 matplotlib
 seaborn
-scikit-learn>=1.0
+scikit-learn>=0.24
 statsmodels
 plotly
 altair
