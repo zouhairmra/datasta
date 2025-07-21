@@ -1,7 +1,7 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
-
+import plotly.graph_objects as go
 st.set_page_config(page_title="Simulation Center", layout="wide")
 
 # Title
@@ -122,21 +122,23 @@ if section == translate("Microeconomics Simulations", "محاكاة الاقتص
 
         st.metric(translate("Profit", "الربح"), profit)
 
-# 📈 Plot revenue vs cost
+# Interactive Plot with Plotly
 quantities = np.arange(1, 101)
 revenues = market_price * quantities
 costs = cost_per_unit * quantities
 
-fig, ax = plt.subplots()
-ax.plot(quantities, revenues, label=translate("Total Revenue", "الإيراد الكلي"), color='green')
-ax.plot(quantities, costs, label=translate("Total Cost", "التكلفة الكلية"), color='red')
-ax.axvline(x=quantity, color='blue', linestyle='--', label=translate("Chosen Quantity", "الكمية المختارة"))
-ax.set_xlabel(translate("Quantity", "الكمية"))
-ax.set_ylabel(translate("Amount", "القيمة"))
-ax.set_title(translate("Revenue and Cost in Competitive Market", "الإيراد والتكلفة في السوق التنافسي"))
-ax.legend()
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=quantities, y=revenues, mode='lines', name=translate("Total Revenue", "الإيراد الكلي"), line=dict(color='green')))
+fig.add_trace(go.Scatter(x=quantities, y=costs, mode='lines', name=translate("Total Cost", "التكلفة الكلية"), line=dict(color='red')))
+fig.add_trace(go.Scatter(x=[quantity], y=[market_price * quantity], mode='markers', name=translate("Chosen Quantity", "الكمية المختارة"), marker=dict(size=10, color='blue')))
 
-st.pyplot(fig)
+fig.update_layout(
+    title=translate("Revenue and Cost in Competitive Market", "الإيراد والتكلفة في السوق التنافسي"),
+    xaxis_title=translate("Quantity", "الكمية"),
+    yaxis_title=translate("Amount", "القيمة"),
+    legend_title=translate("Legend", "المفتاح")
+)
+st.plotly_chart(fig)
         st.subheader(translate("Real Case: Competitive Agriculture", "حالة واقعية: الزراعة التنافسية"))
         st.markdown(translate(
             "In competitive markets like small-scale agriculture, firms are price takers and cannot influence the market price. Their goal is to minimize cost and maximize output.",
@@ -156,7 +158,6 @@ st.pyplot(fig)
         profit = revenue - total_cost + differentiation * 5  # Bonus for uniqueness
 
         st.metric(translate("Profit", "الربح"), profit)
-# 📊 Profit vs Differentiation Level
 diff_range = np.arange(0, 11)
 profits = [(price * quantity - avg_cost * quantity + d * 5) for d in diff_range]
 
@@ -173,6 +174,7 @@ fig.update_layout(
     title=translate("Profit vs Product Differentiation", "الربح مقابل درجة تميز المنتج"),
     xaxis_title=translate("Product Differentiation Level", "درجة التميز"),
     yaxis_title=translate("Profit", "الربح"),
+    legend_title=translate("Legend", "المفتاح")
 )
 
 st.plotly_chart(fig)
