@@ -10,59 +10,55 @@ import joblib
 import matplotlib.pyplot as plt
 import seaborn as sns
 import sqlite3
-from datetime import datetime
+import datetime
 
+# Streamlit Page Configuration
 st.set_page_config(page_title="📈 Machine Learning - Economic Data", layout="wide")
 st.title("📈 Machine Learning on Economic Data")
 
-# Configurable DB path
-DB_PATH = "ml_models.db"
+# ---------- DATABASE CONNECTION ---------- #
+@st.cache_resource
+def get_connection():
+    conn = sqlite3.connect("ml_models.db", check_same_thread=False)
+    return conn
 
-# Function to initialize DB and tables
-def init_db():
-    try:
-        conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
-        # Table for model metrics
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS model_metrics (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                target TEXT,
-                features TEXT,
-                problem_type TEXT,
-                metric_value REAL,
-                timestamp TEXT
-            )
-        """)
-        # Table for app usage stats (optional)
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS app_usage (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                page TEXT,
-                visit_time TEXT
-            )
-        """)
-        conn.commit()
-        return conn, cursor
-    except sqlite3.Error as e:
-        st.error(f"Database error: {e}")
-        return None, None
+conn = get_connection()
+cursor = conn.cursor()
 
-conn, cursor = init_db()
+# Create table if not exists
+cursor.execute("""
+    CREATE TABLE IF NOT EXISTS model_metrics (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        target TEXT,
+        features TEXT,
+        problem_type TEXT,
+        metric_value REAL,
+        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+""")
+conn.commit()
 
-# Record page visit
-if cursor:
-    with conn:
-        cursor.execute("INSERT INTO app_usage (page, visit_time) VALUES (?, ?)", ("Machine Learning - Economic Data", datetime.now().isoformat()))
+def save_metrics(target, selected_features, problem_type, metric_value):
+    cursor.execute(
+        "INSERT INTO model_metrics (target, features, problem_type, metric_value) VALUES (?, ?, ?, ?)",
+        (target, ','.join(selected_features), problem_type, metric_value)
+    )
+    conn.commit()
+
+# ---------- DATA LOADING ---------- #
+@st.cache_data
+def load_data(uploaded_file):
+    return pd.read_csv(uploaded_file)
 
 uploaded_file = st.file_uploader("Upload a CSV file", type="csv")
 
 if uploaded_file:
-    df = pd.read_csv(uploaded_file)
+    df = load_data(uploaded_file)
     st.write("## Preview of Data")
     st.dataframe(df.head())
 
     numeric_cols = df.select_dtypes(include=np.number).columns.tolist()
+
     if len(numeric_cols) < 2:
         st.warning("Please upload a dataset with at least two numeric columns.")
     else:
@@ -87,11 +83,7 @@ if uploaded_file:
             y = df[target]
             X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size / 100, random_state=42)
 
-            if problem_type == "regression":
-                model = RandomForestRegressor(random_state=42)
-            else:
-                model = RandomForestClassifier(random_state=42)
-
+            model = RandomForestRegressor() if problem_type == "regression" else RandomForestClassifier()
             model.fit(X_train, y_train)
             y_pred = model.predict(X_test)
 
@@ -106,15 +98,9 @@ if uploaded_file:
                 st.write(f"Accuracy: {acc:.2f}")
                 metric_value = acc
 
-            # Save to DB safely
-            if cursor:
-                with conn:
-                    cursor.execute(
-                        "INSERT INTO model_metrics (target, features, problem_type, metric_value, timestamp) VALUES (?, ?, ?, ?, ?)",
-                        (target, ','.join(selected_features), problem_type, metric_value, datetime.now().isoformat())
-                    )
+            save_metrics(target, selected_features, problem_type, metric_value)
 
-            # Charts
+            # Feature Importance
             st.subheader("📈 Feature Importance")
             importances = model.feature_importances_
             fig, ax = plt.subplots()
@@ -126,11 +112,11 @@ if uploaded_file:
             st.subheader("🔍 Model Interpretability (SHAP)")
             explainer = shap.TreeExplainer(model)
             shap_values = explainer.shap_values(X_test)
+            st.write("SHAP Summary Plot:")
+            shap.summary_plot(shap_values, X_test, plot_type="bar", show=False)
+            st.pyplot(bbox_inches='tight')
 
-            fig_shap = plt.figure()
-            shap.summary_plot(shap_values, X_test, show=False, plot_type="bar")
-            st.pyplot(fig_shap)
-
+            # Cross Validation
             if st.checkbox("📊 Run cross-validation"):
                 k = st.slider("Number of folds", 2, 10, 5)
                 score_type = "neg_root_mean_squared_error" if problem_type == "regression" else "accuracy"
@@ -138,10 +124,12 @@ if uploaded_file:
                 st.write(f"Mean CV Score: {np.abs(cv_scores.mean()):.2f}")
                 st.write("All CV Scores:", np.round(np.abs(cv_scores), 2))
 
+            # Download Model
             joblib.dump(model, "trained_model.pkl")
             with open("trained_model.pkl", "rb") as f:
                 st.download_button("📦 Download Trained Model", f, file_name="model.pkl")
 
+            # Prediction Quiz
             st.markdown("---")
             st.subheader("🧠 Try a Quiz: Predict the Target")
             sample = df.sample(1)
@@ -152,25 +140,3 @@ if uploaded_file:
             if st.button("Submit Guess"):
                 st.success(f"Actual: {actual}, Your guess: {guess}")
                 st.write(f"Error: {abs(guess - actual):.2f}")
-
-# Option to view saved metrics
-if cursor:
-    st.sidebar.markdown("---")
-    st.sidebar.subheader("📂 Past Model Metrics")
-    view_metrics = st.sidebar.checkbox("Show saved model metrics")
-    if view_metrics:
-        cursor.execute("SELECT id, target, features, problem_type, metric_value, timestamp FROM model_metrics ORDER BY timestamp DESC LIMIT 10")
-        rows = cursor.fetchall()
-        if rows:
-            metrics_df = pd.DataFrame(rows, columns=["ID", "Target", "Features", "Problem Type", "Metric", "Timestamp"])
-            st.sidebar.dataframe(metrics_df)
-        else:
-            st.sidebar.write("No saved model metrics yet.")
-
-# Close DB connection on exit
-def close_connection():
-    if conn:
-        conn.close()
-
-st.experimental_singleton.clear()
-st.on_event("shutdown", close_connection)
