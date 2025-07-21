@@ -23,26 +23,40 @@ if uploaded_file:
         st.warning("Please upload a dataset with at least two numeric columns.")
     else:
         target = st.selectbox("🎯 Select target variable (Y)", numeric_cols)
+        problem_type = st.radio("Select problem type", ["regression", "classification"])
         features = st.multiselect("🧮 Select feature variables (X)", [col for col in numeric_cols if col != target])
 
-        if st.checkbox("🔎 Use auto-feature selection") and features:
-            k = st.slider("Number of top features to select", 1, len(features), min(3, len(features)))
-            selector = SelectKBest(score_func=f_regression, k=k)
-            X_selected = selector.fit_transform(df[features], df[target])
-            selected_features = [features[i] for i in selector.get_support(indices=True)]
-            st.write("Selected Features:", selected_features)
-        else:
-            selected_features = features
+        selected_features = []
+
+        if features:
+            if st.checkbox("🔎 Use auto-feature selection"):
+                k = st.slider("Number of top features to select", 1, len(features), min(3, len(features)))
+                score_func = f_regression if problem_type == "regression" else chi2
+                X_for_selection = df[features]
+                y_for_selection = df[target]
+
+                # For chi2, all values must be non-negative
+                if problem_type == "classification":
+                    X_for_selection = X_for_selection - X_for_selection.min()
+
+                selector = SelectKBest(score_func=score_func, k=k)
+                X_selected = selector.fit_transform(X_for_selection, y_for_selection)
+                selected_features = [features[i] for i in selector.get_support(indices=True)]
+                st.write("Selected Features:", selected_features)
+            else:
+                selected_features = features
 
         if selected_features:
-            problem_type = st.radio("Select problem type", ["regression", "classification"])
             test_size = st.slider("Test size (%)", 10, 50, 20)
 
             X = df[selected_features]
             y = df[target]
             X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size / 100, random_state=42)
 
-            model = RandomForestRegressor() if problem_type == "regression" else RandomForestClassifier()
+            if problem_type == "regression":
+                model = RandomForestRegressor()
+            else:
+                model = RandomForestClassifier()
 
             model.fit(X_train, y_train)
             y_pred = model.predict(X_test)
@@ -53,30 +67,37 @@ if uploaded_file:
                 rmse = np.sqrt(mse)
                 st.write(f"RMSE: {rmse:.2f}")
             else:
-                acc = accuracy_score(y_test, y_pred)
-                st.write(f"Accuracy: {acc:.2f}")
+                st.write(f"Accuracy: {accuracy_score(y_test, y_pred):.2f}")
 
             if st.checkbox("📊 Run cross-validation"):
                 k = st.slider("Number of folds", 2, 10, 5)
                 score_type = "neg_root_mean_squared_error" if problem_type == "regression" else "accuracy"
                 cv_scores = cross_val_score(model, X, y, cv=k, scoring=score_type)
-                mean_score = np.abs(cv_scores.mean()) if problem_type == "regression" else cv_scores.mean()
-                st.write(f"Mean CV Score: {mean_score:.2f}")
-                st.write("All CV Scores:", np.round(np.abs(cv_scores), 2) if problem_type == "regression" else np.round(cv_scores, 2))
+                st.write(f"Mean CV Score: {np.abs(cv_scores.mean()):.2f}")
+                st.write("All CV Scores:", np.round(np.abs(cv_scores), 2))
 
-            # Downloadable model
             joblib.dump(model, "trained_model.pkl")
             with open("trained_model.pkl", "rb") as f:
                 st.download_button("📦 Download Trained Model", f, file_name="model.pkl")
 
-            # Quiz section
             st.markdown("---")
             st.subheader("🧠 Try a Quiz: Predict the Target")
             sample = df.sample(1)
             st.write("Guess the target for this observation:")
             st.write(sample[selected_features])
-            guess = st.number_input("Your guess for the target value:", format="%.2f")
-            actual = sample[target].values[0]
-            if st.button("Submit Guess"):
-                st.success(f"Actual: {actual}, Your guess: {guess}")
-                st.write(f"Error: {abs(guess - actual):.2f}")
+
+            if problem_type == "regression":
+                guess = st.number_input("Your guess for the target value:", format="%.2f")
+                actual = sample[target].values[0]
+                if st.button("Submit Guess"):
+                    st.success(f"Actual: {actual}, Your guess: {guess}")
+                    st.write(f"Error: {abs(guess - actual):.2f}")
+            else:
+                options = df[target].unique().tolist()
+                guess = st.selectbox("Your guess for the target class:", options)
+                actual = sample[target].values[0]
+                if st.button("Submit Guess"):
+                    if guess == actual:
+                        st.success(f"Correct! 🎉 It was {actual}")
+                    else:
+                        st.error(f"Incorrect. You guessed {guess}, but actual was {actual}")
