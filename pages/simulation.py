@@ -122,6 +122,21 @@ if section == translate("Microeconomics Simulations", "محاكاة الاقتص
 
         st.metric(translate("Profit", "الربح"), profit)
 
+# 📈 Plot revenue vs cost
+quantities = np.arange(1, 101)
+revenues = market_price * quantities
+costs = cost_per_unit * quantities
+
+fig, ax = plt.subplots()
+ax.plot(quantities, revenues, label=translate("Total Revenue", "الإيراد الكلي"), color='green')
+ax.plot(quantities, costs, label=translate("Total Cost", "التكلفة الكلية"), color='red')
+ax.axvline(x=quantity, color='blue', linestyle='--', label=translate("Chosen Quantity", "الكمية المختارة"))
+ax.set_xlabel(translate("Quantity", "الكمية"))
+ax.set_ylabel(translate("Amount", "القيمة"))
+ax.set_title(translate("Revenue and Cost in Competitive Market", "الإيراد والتكلفة في السوق التنافسي"))
+ax.legend()
+
+st.pyplot(fig)
         st.subheader(translate("Real Case: Competitive Agriculture", "حالة واقعية: الزراعة التنافسية"))
         st.markdown(translate(
             "In competitive markets like small-scale agriculture, firms are price takers and cannot influence the market price. Their goal is to minimize cost and maximize output.",
@@ -141,7 +156,26 @@ if section == translate("Microeconomics Simulations", "محاكاة الاقتص
         profit = revenue - total_cost + differentiation * 5  # Bonus for uniqueness
 
         st.metric(translate("Profit", "الربح"), profit)
+# 📊 Profit vs Differentiation Level
+diff_range = np.arange(0, 11)
+profits = [(price * quantity - avg_cost * quantity + d * 5) for d in diff_range]
 
+fig = go.Figure()
+fig.add_trace(go.Scatter(
+    x=diff_range,
+    y=profits,
+    mode='lines+markers',
+    name=translate("Profit", "الربح"),
+    line=dict(color='purple')
+))
+
+fig.update_layout(
+    title=translate("Profit vs Product Differentiation", "الربح مقابل درجة تميز المنتج"),
+    xaxis_title=translate("Product Differentiation Level", "درجة التميز"),
+    yaxis_title=translate("Profit", "الربح"),
+)
+
+st.plotly_chart(fig)
         st.subheader(translate("Real Case: Coffee Shops", "حالة واقعية: المقاهي"))
         st.markdown(translate(
             "Coffee shops operate in a monopolistic competition structure. Each tries to stand out (location, taste, atmosphere) while still competing on price.",
