@@ -183,14 +183,17 @@ if section == translate("Microeconomics Simulations", "محاكاة الاقتص
         st.plotly_chart(fig)
 
 # Create OpenAI-compatible client for OpenRouter
+# Step 1: Initialize the OpenRouter client
 client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
     api_key=os.getenv("OPENROUTER_API_KEY") or st.secrets["OPENROUTER_API_KEY"]
 )
-def ask_testmodel(prompt):
+
+# Step 2: Define the function
+def ask_mixtral(prompt):
     try:
         response = client.chat.completions.create(
-            model="openai/gpt-3.5-turbo",
+            model="mistralai/mixtral-8x7b",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.7
         )
