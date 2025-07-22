@@ -180,41 +180,48 @@ if section == translate("Microeconomics Simulations", "محاكاة الاقتص
 
         st.plotly_chart(fig)
 
-# Title
-st.title("🤖 DeepSeek Chatbot (Together AI)")
+ Page title
+st.title("🧠 AI Economic Assistant (DeepSeek LLM)")
 
-# Load API key
-api_key = st.secrets["together"]["api_key"]
+# User API Key input
+api_key = st.text_input("🔑 Enter your Together AI API Key", type="password")
 
-# User prompt
-user_input = st.text_area("💬 Ask your question to DeepSeek:", height=200)
+# Input text from user
+prompt = st.text_area("💬 Ask your question:", height=150, placeholder="e.g., What is the effect of inflation on unemployment?")
 
-def ask_deepseek(prompt):
-    url = "https://api.together.xyz/v1/chat/completions"
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json"
-    }
-    payload = {
-        "model": "deepseek-ai/deepseek-coder-6.7b-instruct",  # ✅ Use exact model name
-        "messages": [{"role": "user", "content": prompt}],
-        "temperature": 0.7,
-        "max_tokens": 512
-    }
+# Button to trigger API call
+if st.button("Generate Answer"):
 
-    response = requests.post(url, headers=headers, json=payload)
-    if response.status_code == 200:
-        return response.json()["choices"][0]["message"]["content"]
+    if not api_key:
+        st.error("Please enter your Together AI API key.")
+    elif not prompt.strip():
+        st.error("Please write a question or prompt.")
     else:
-        return f"❌ HTTP error {response.status_code} - {response.json()}"
+        # Set up API call
+        url = "https://api.together.xyz/v1/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "model": "deepseek-ai/deepseek-llm-7b-chat",
+            "messages": [
+                {"role": "system", "content": "You are a helpful and knowledgeable economics assistant."},
+                {"role": "user", "content": prompt}
+            ],
+            "temperature": 0.7,
+            "max_tokens": 1024
+        }
 
-if st.button("🔍 Get Answer"):
-    if user_input.strip() == "":
-        st.warning("Please enter a prompt.")
-    else:
-        with st.spinner("Talking to DeepSeek..."):
-            output = ask_deepseek(user_input)
-            st.markdown("### 🤖 DeepSeek Says:")
-            st.write(output)
-
-   
+        # Call the Together API
+        try:
+            response = requests.post(url, headers=headers, json=payload)
+            if response.status_code == 200:
+                result = response.json()
+                answer = result["choices"][0]["message"]["content"]
+                st.markdown("### 🤖 Answer")
+                st.write(answer)
+            else:
+                st.error(f"❌ Error {response.status_code} - {response.json()}")
+        except Exception as e:
+            st.exception(e)
