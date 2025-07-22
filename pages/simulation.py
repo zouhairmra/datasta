@@ -181,33 +181,31 @@ if section == translate("Microeconomics Simulations", "محاكاة الاقتص
 
         st.plotly_chart(fig)
 
-# Create OpenAI client for OpenRouter
+# Set up OpenAI client with OpenRouter endpoint
 client = openai.OpenAI(
     api_key=api_key,
     base_url="https://openrouter.ai/api/v1",
     default_headers={
-        "HTTP-Referer": "https://datasta.streamlit.app",  # customize with your actual Streamlit app URL
-        "X-Title": "Datasta Gemini Assistant"
+        "HTTP-Referer": "https://datasta.streamlit.app",  # update with your actual app URL
+        "X-Title": "Datasta Mixtral Assistant"
     }
 )
 
-# Define Gemini-based assistant
-def ask_gemini(question):
+# Mixtral assistant function
+def ask_mixtral(question):
     try:
         response = client.chat.completions.create(
-            model="models/google/gemini-pro",  # ✅ correct format
-            messages=[
-                {"role": "user", "content": question}
-            ],
-            temperature=0.7,
+            model="models/mistralai/mixtral-8x7b",  # ✅ correct model name
+            messages=[{"role": "user", "content": question}],
+            temperature=0.7
         )
         return response.choices[0].message.content
     except Exception as e:
         return f"❌ Error: {e}"
 
 # Streamlit UI
-st.subheader("🧠 Gemini AI Assistant")
+st.subheader("🧠 Mixtral AI Assistant")
 user_input = st.text_input("Ask your question:")
 if user_input:
-    answer = ask_gemini(user_input)
+    answer = ask_mixtral(user_input)
     st.markdown(answer)
