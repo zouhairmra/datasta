@@ -180,40 +180,42 @@ if section == translate("Microeconomics Simulations", "محاكاة الاقتص
 
         st.plotly_chart(fig)
 
-def ask_llama3(prompt, api_key):
-    url = "https://api.together.xyz/v1/chat/completions"
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json"
-    }
-    payload = {
-        "model": "meta-llama/llama-3-8b-instruct",
-        "messages": [{"role": "user", "content": prompt}],
-        "temperature": 0.7
-    }
-    response = requests.post(url, headers=headers, json=payload)
-    
-    if response.status_code == 200:
-        return response.json()["choices"][0]["message"]["content"]
-    else:
-        raise Exception(f"❌ Error: {response.status_code} - {response.json()}")
+# --- Load API key securely ---
+api_key = st.secrets["together"]["api_key"]
 
+# --- LLaMA 3 Assistant Function ---
+def ask_llama(question):
+    try:
+        response = requests.post(
+            "https://api.together.xyz/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "model": "meta-llama/llama-3-8b-instruct",
+                "messages": [{"role": "user", "content": question}],
+                "temperature": 0.7,
+                "max_tokens": 1024
+            }
+        )
+        response.raise_for_status()
+        data = response.json()
+        return data["choices"][0]["message"]["content"]
+    except requests.exceptions.HTTPError as err:
+        return f"❌ HTTP error: {err.response.status_code} - {err.response.json()}"
+    except Exception as e:
+        return f"❌ General error: {str(e)}"
 
-# Now outside the function, at top-level in your script:
-if section == translate("AI Assistant", "المساعد الذكي"):
-    st.header(translate("AI Assistant", "المساعد الذكي"))
-    
-    question = st.text_input(translate("Ask the AI assistant", "اطرح سؤالاً على المساعد الذكي"))
-    
-    # Replace with your actual API key or use st.secrets["TOGETHER_API_KEY"]
-    api_key = st.secrets["3847d5ca2dcd5ce363968742d0f9c2b42a3bb44c7ef820beef0c3924250072d0"]
-    
-    if question:
-        try:
-            reply = ask_llama3(question, api_key)
-            st.markdown("### 💬 " + translate("Model Response", "رد النموذج"))
-            st.write(reply)
-        except Exception as e:
-            st.error(str(e))
+# --- Streamlit UI for Assistant ---
+st.subheader("💬 LLaMA 3 Assistant")
+
+user_question = st.text_input("Ask your economics question to LLaMA 3:")
+
+if user_question:
+    with st.spinner("Thinking..."):
+        response = ask_llama(user_question)
+        st.markdown("**Assistant's reply:**")
+        st.write(response)
 
    
