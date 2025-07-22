@@ -203,3 +203,9 @@ def ask_gemini(question):
         return response.choices[0].message.content
     except Exception as e:
         return f"❌ Error: {e}"
+# Streamlit UI
+st.subheader("🤖 Gemini Assistant (OpenRouter)")
+user_input = st.text_input("Ask your question:")
+if user_input:
+    reply = ask_gemini(user_input)
+    st.markdown(reply)
