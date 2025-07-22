@@ -7,8 +7,6 @@ import openai
 from openai import OpenAI
 import os
 
-# Set API key from secrets or env variable
-api_key = os.getenv("OPENROUTER_API_KEY") or st.secrets["OPENROUTER_API_KEY"]
 st.set_page_config(page_title="Simulation Center", layout="wide")
 
 # Title
@@ -182,29 +180,35 @@ if section == translate("Microeconomics Simulations", "محاكاة الاقتص
 
         st.plotly_chart(fig)
 
-# Create OpenAI-compatible client for OpenRouter
-# Step 1: Initialize the OpenRouter client
-client = OpenAI(
-    base_url="https://openrouter.ai/api/v1",
-    api_key=os.getenv("OPENROUTER_API_KEY") or st.secrets["OPENROUTER_API_KEY"]
-)
-
-# Step 2: Define the function
-def ask_mixtral(prompt):
-    try:
-        response = client.chat.completions.create(
-            model="mistralai/mixtral-8x7b",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.7
-        )
-        return response.choices[0].message.content
-    except Exception as e:
-        return f"❌ Error: {e}"
-
-# Streamlit UI
-st.subheader("🤖 Mixtral AI Assistant")
-question = st.text_input("Ask your question:")
-if st.button("Ask"):
-    reply = ask_mixtral(question)
-    st.write(reply)
-
+def ask_llama3(prompt, api_key):
+    url = "https://api.together.xyz/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "model": "meta-llama/llama-3-8b-instruct",
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.7
+    }
+    response = requests.post(url, headers=headers, json=payload)
+    
+    if response.status_code == 200:
+        return response.json()["choices"][0]["message"]["content"]
+    else:
+        raise Exception(f"❌ Error: {response.status_code} - {response.json()}")
+    elif section == translate("AI Assistant", "المساعد الذكي"):
+    st.header(translate("AI Assistant", "المساعد الذكي"))
+    
+    question = st.text_input(translate("Ask the AI assistant", "اطرح سؤالاً على المساعد الذكي"))
+    
+    # Replace with your actual API key or use st.secrets["TOGETHER_API_KEY"]
+   api_key = st.secrets["TOGETHER_API_KEY"]
+    
+    if question:
+        try:
+            reply = ask_llama3(question, api_key)
+            st.markdown("### 💬 " + translate("Model Response", "رد النموذج"))
+            st.write(reply)
+        except Exception as e:
+            st.error(str(e))
