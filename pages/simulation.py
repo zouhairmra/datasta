@@ -182,7 +182,7 @@ if section == translate("Microeconomics Simulations", "محاكاة الاقتص
 
 # --- Load API key securely ---
 api_key = st.secrets["together"]["api_key"]
-
+st.write("✅ API key loaded successfully!")
 # --- LLaMA 3 Assistant Function ---
 def ask_llama(question):
     try:
