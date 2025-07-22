@@ -181,22 +181,21 @@ if section == translate("Microeconomics Simulations", "محاكاة الاقتص
 
         st.plotly_chart(fig)
 
-# Set up OpenAI client with OpenRouter endpoint
-client = openai.OpenAI(
+# Create OpenAI-compatible client for OpenRouter
+client = OpenAI(
     api_key=api_key,
     base_url="https://openrouter.ai/api/v1",
     default_headers={
-        "HTTP-Referer": "https://datasta.streamlit.app",  # update with your actual app URL
-        "X-Title": "Datasta Mixtral Assistant"
+        "HTTP-Referer": "https://datasta.streamlit.app",  # Change to your actual site URL
+        "X-Title": "Datasta Assistant"
     }
 )
 
-# Mixtral assistant function
-def ask_mixtral(question):
+def ask_mixtral(prompt):
     try:
         response = client.chat.completions.create(
-            model="models/mistralai/mixtral-8x7b",  # ✅ correct model name
-            messages=[{"role": "user", "content": question}],
+            model="mistralai/mixtral-8x7b",  # ✅ correct model ID
+            messages=[{"role": "user", "content": prompt}],
             temperature=0.7
         )
         return response.choices[0].message.content
@@ -204,8 +203,8 @@ def ask_mixtral(question):
         return f"❌ Error: {e}"
 
 # Streamlit UI
-st.subheader("🧠 Mixtral AI Assistant")
-user_input = st.text_input("Ask your question:")
-if user_input:
-    answer = ask_mixtral(user_input)
-    st.markdown(answer)
+st.subheader("🤖 Mixtral AI Assistant")
+question = st.text_input("What do you want to ask Mixtral?")
+if question:
+    reply = ask_mixtral(question)
+    st.markdown(reply)
