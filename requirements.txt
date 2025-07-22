@@ -11,6 +11,7 @@ requests
 PyYAML
 bcrypt
 openai
+json
 wbdata
 shap
 sqlalchemy
