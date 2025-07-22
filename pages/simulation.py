@@ -180,18 +180,47 @@ if section == translate("Microeconomics Simulations", "محاكاة الاقتص
 
         st.plotly_chart(fig)
 
+# Title
+st.title("🧠 Simulation Assistant using Together AI")
+
+# Get API key from secrets
+api_key = st.secrets["together"]["api_key"]
+
+# User input
+user_input = st.text_area("Enter your simulation prompt:", height=200)
+
+# Call Together API
 def ask_together(prompt):
     url = "https://api.together.xyz/v1/chat/completions"
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json"
     }
-    data = {
+    payload = {
         "model": "meta-llama/llama-3-8b-instruct",
-        "messages": [{"role": "user", "content": prompt}],
-        "temperature": 0.7
+        "messages": [
+            {"role": "user", "content": prompt}
+        ],
+        "temperature": 0.7,
+        "max_tokens": 512
     }
-    response = requests.post(url, headers=headers, json=data)
-    return response.json()
+
+    response = requests.post(url, headers=headers, json=payload)
+
+    if response.status_code == 200:
+        data = response.json()
+        return data['choices'][0]['message']['content']
+    else:
+        return f"❌ HTTP error {response.status_code} - {response.json()}"
+
+# Submit button
+if st.button("Run Simulation"):
+    if user_input.strip() == "":
+        st.warning("Please enter a prompt.")
+    else:
+        with st.spinner("Generating response..."):
+            result = ask_together(user_input)
+            st.markdown("### 💬 Response")
+            st.write(result)
 
    
