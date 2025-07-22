@@ -4,7 +4,8 @@ import pandas as pd
 import plotly.graph_objects as go
 import openai
 import os
-os.environ["OPENAI_API_KEY"] = "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"
+ OPENAI_API_KEY = st.secrets ["OPENAI_API_KEY"]
+
 st.set_page_config(page_title="Simulation Center", layout="wide")
 
 # Title
