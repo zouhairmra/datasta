@@ -180,32 +180,26 @@ if section == translate("Microeconomics Simulations", "محاكاة الاقتص
 
         st.plotly_chart(fig)
 
-# Title
-st.title("🧠 AI Economic Assistant (DeepSeek LLM)")
+st.title("🧠 AI Economics Assistant (Mistral-7B)")
 
-# API key input
 api_key = st.text_input("🔑 Enter your Together AI API Key", type="password")
+prompt = st.text_area("💬 Ask a question:", height=150)
 
-# Prompt input
-prompt = st.text_area("💬 Ask your economic question:", height=150, placeholder="e.g., What is the impact of interest rates on inflation?")
-
-# Button
 if st.button("Generate Answer"):
     if not api_key:
-        st.error("❌ Please enter your Together AI API key.")
+        st.error("❌ Please enter your API key.")
     elif not prompt.strip():
-        st.error("❌ Please write a question.")
+        st.error("❌ Please write a prompt.")
     else:
-        # API call setup
         url = "https://api.together.xyz/v1/chat/completions"
         headers = {
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json"
         }
         payload = {
-            "model": "deepseek-ai/deepseek-llm-7b-chat",  # ✅ Free + serverless model
+            "model": "mistralai/Mistral-7B-Instruct-v0.2",  # ✅ Update this with your chosen model
             "messages": [
-                {"role": "system", "content": "You are a helpful economics assistant."},
+                {"role": "system", "content": "You are an expert in economics."},
                 {"role": "user", "content": prompt}
             ],
             "temperature": 0.7,
@@ -213,13 +207,12 @@ if st.button("Generate Answer"):
         }
 
         try:
-            response = requests.post(url, headers=headers, json=payload)
-            if response.status_code == 200:
-                result = response.json()
-                answer = result["choices"][0]["message"]["content"]
+            resp = requests.post(url, headers=headers, json=payload)
+            if resp.status_code == 200:
+                answer = resp.json()["choices"][0]["message"]["content"]
                 st.markdown("### 🤖 Answer")
                 st.write(answer)
             else:
-                st.error(f"❌ HTTP error {response.status_code} - {response.json()}")
+                st.error(f"❌ HTTP {resp.status_code}: {resp.json()}")
         except Exception as e:
-            st.error(f"❌ Exception: {e}")
+            st.error(f"❌ Error: {e}")
