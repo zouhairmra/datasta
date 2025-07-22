@@ -181,7 +181,7 @@ if section == translate("Microeconomics Simulations", "محاكاة الاقتص
         st.plotly_chart(fig)
 
 # Load Gemini model
-model = genai.GenerativeModel("gemini-pro")
+model = genai.GenerativeModel("models/gemini-pro")  # ✅ correct
 
 # Streamlit App Layout
 st.title("🧠 Gemini AI Economic Assistant")
