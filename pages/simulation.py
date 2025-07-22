@@ -203,7 +203,8 @@ def ask_mixtral(prompt):
 
 # Streamlit UI
 st.subheader("🤖 Mixtral AI Assistant")
-question = st.text_input("What do you want to ask Mixtral?")
-if question:
+question = st.text_input("Ask your question:")
+if st.button("Ask"):
     reply = ask_mixtral(question)
-    st.markdown(reply)
+    st.write(reply)
+
