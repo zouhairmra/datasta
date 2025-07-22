@@ -2,10 +2,11 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
-from openai import OpenAI
-import os
 import requests
-import json
+import google.generativeai as genai
+import os
+api_key = st.secrets.get("GEMINI_API_KEY", "AIzaSyBjwjZeKC1TUExUsmeD_keyY9gJr8G9SZs")
+genai.configure(api_key=api_key)
 st.set_page_config(page_title="Simulation Center", layout="wide")
 
 # Title
@@ -179,20 +180,23 @@ if section == translate("Microeconomics Simulations", "محاكاة الاقتص
 
         st.plotly_chart(fig)
 
-response = requests.post(
-  url="https://openrouter.ai/api/v1/chat/completions",
-  headers={
-    "Authorization": "Bearer <OPENROUTER_API_KEY>",
-    "HTTP-Referer": "<YOUR_SITE_URL>", # Optional. Site URL for rankings on openrouter.ai.
-    "X-Title": "<YOUR_SITE_NAME>", # Optional. Site title for rankings on openrouter.ai.
-  },
-  data=json.dumps({
-    "model": "openai/gpt-4o", # Optional
-    "messages": [
-      {
-        "role": "user",
-        "content": "What is the meaning of life?"
-      }
-    ]
-  })
-)
+# Load Gemini model
+model = genai.GenerativeModel("gemini-pro")
+
+# Streamlit App Layout
+st.title("🧠 Gemini AI Economic Assistant")
+
+st.markdown("Ask any question related to your economic simulation 👇")
+
+# Text input for user prompt
+prompt = st.text_area("Your question to Gemini:")
+
+# Handle AI response
+if st.button("Ask Gemini") and prompt.strip():
+    with st.spinner("Gemini is thinking..."):
+        try:
+            response = model.generate_content(prompt)
+            st.success("Here is Gemini's response:")
+            st.write(response.text)
+        except Exception as e:
+            st.error(f"Error: {e}")
