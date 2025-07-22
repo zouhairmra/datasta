@@ -180,42 +180,18 @@ if section == translate("Microeconomics Simulations", "محاكاة الاقتص
 
         st.plotly_chart(fig)
 
-# --- Load API key securely ---
-api_key = st.secrets["together"]["api_key"]
-st.write("✅ API key loaded successfully!")
-# --- LLaMA 3 Assistant Function ---
-def ask_llama(question):
-    try:
-        response = requests.post(
-            "https://api.together.xyz/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {api_key}",
-                "Content-Type": "application/json"
-            },
-            json={
-                "model": "meta-llama/llama-3-8b-instruct",
-                "messages": [{"role": "user", "content": question}],
-                "temperature": 0.7,
-                "max_tokens": 1024
-            }
-        )
-        response.raise_for_status()
-        data = response.json()
-        return data["choices"][0]["message"]["content"]
-    except requests.exceptions.HTTPError as err:
-        return f"❌ HTTP error: {err.response.status_code} - {err.response.json()}"
-    except Exception as e:
-        return f"❌ General error: {str(e)}"
-
-# --- Streamlit UI for Assistant ---
-st.subheader("💬 LLaMA 3 Assistant")
-
-user_question = st.text_input("Ask your economics question to LLaMA 3:")
-
-if user_question:
-    with st.spinner("Thinking..."):
-        response = ask_llama(user_question)
-        st.markdown("**Assistant's reply:**")
-        st.write(response)
+def ask_together(prompt):
+    url = "https://api.together.xyz/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+    data = {
+        "model": "meta-llama/llama-3-8b-instruct",
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.7
+    }
+    response = requests.post(url, headers=headers, json=data)
+    return response.json()
 
    
