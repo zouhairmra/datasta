@@ -6,7 +6,7 @@ import requests
 import google.generativeai as genai
 import os
 api_key = st.secrets.get("GEMINI_API_KEY", "AIzaSyBjwjZeKC1TUExUsmeD_keyY9gJr8G9SZs")
-genai.configure(api_key=api_key)
+genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 st.set_page_config(page_title="Simulation Center", layout="wide")
 
 # Title
@@ -180,23 +180,13 @@ if section == translate("Microeconomics Simulations", "محاكاة الاقتص
 
         st.plotly_chart(fig)
 
-# Load Gemini model
-model = genai.GenerativeModel("models/gemini-pro")  # ✅ correct
 
 # Streamlit App Layout
-st.title("🧠 Gemini AI Economic Assistant")
+st.title("Gemini Model Check")
 
-st.markdown("Ask any question related to your economic simulation 👇")
+models = genai.list_models()
 
-# Text input for user prompt
-prompt = st.text_area("Your question to Gemini:")
-
-# Handle AI response
-if st.button("Ask Gemini") and prompt.strip():
-    with st.spinner("Gemini is thinking..."):
-        try:
-            response = model.generate_content(prompt)
-            st.success("Here is Gemini's response:")
-            st.write(response.text)
-        except Exception as e:
-            st.error(f"Error: {e}")
+for m in models:
+    st.write(f"Model: {m.name}")
+    st.write(f"Supported methods: {m.supported_generation_methods}")
+    st.markdown("---")
