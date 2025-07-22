@@ -12,6 +12,7 @@ PyYAML
 bcrypt
 openai
 wbdata
+google-generativeai
 shap
 sqlalchemy
 joblib
