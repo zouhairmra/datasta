@@ -182,19 +182,14 @@ if section == translate("Microeconomics Simulations", "محاكاة الاقتص
         st.plotly_chart(fig)
 
 # Create OpenAI-compatible client for OpenRouter
-client = openai.OpenAI(
-    api_key=api_key,
+client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
-    default_headers={
-        "HTTP-Referer": "https://datasta.streamlit.app",  # replace with your domain
-        "X-Title": "Datasta Assistant"
-    }
+    api_key=os.getenv("OPENROUTER_API_KEY") or st.secrets["OPENROUTER_API_KEY"]
 )
-
 def ask_mixtral(prompt):
     try:
         response = client.chat.completions.create(
-            model="mistral/mixtral-8x7b",  # ✅ Correct model ID
+            model="mistralai/mixtral-8x7b",  # ✅ Correct model ID
             messages=[{"role": "user", "content": prompt}],
             temperature=0.7
         )
