@@ -193,11 +193,11 @@ client = openai.OpenAI(
 
 def ask_mixtral(prompt):
     try:
-        response = client.chat.completions.create(
-            model="mistralai/mixtral-8x7b",  # ✅ correct model ID
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.7
-        )
+       response = client.chat.completions.create(
+    model="mistral/mixtral-8x7b",  # ✅ Corrected model ID
+    messages=[{"role": "user", "content": prompt}],
+    temperature=0.7
+)
         return response.choices[0].message.content
     except Exception as e:
         return f"❌ Error: {e}"
