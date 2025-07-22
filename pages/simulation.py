@@ -177,9 +177,11 @@ if section == translate("Microeconomics Simulations", "محاكاة الاقتص
 
         st.plotly_chart(fig)
 
+# Initialize OpenAI client once
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-elif section == translate("AI Assistant", "المساعد الذكي"):
+# --- AI Assistant Section ---
+if section == translate("AI Assistant", "المساعد الذكي"):
     st.header(translate("Ask the AI Assistant", "اسأل المساعد الذكي"))
 
     user_question = st.text_area(
