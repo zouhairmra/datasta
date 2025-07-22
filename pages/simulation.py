@@ -186,16 +186,17 @@ client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
     api_key=os.getenv("OPENROUTER_API_KEY") or st.secrets["OPENROUTER_API_KEY"]
 )
-def ask_mixtral(prompt):
+def ask_testmodel(prompt):
     try:
         response = client.chat.completions.create(
-            model="mistralai/mixtral-8x7b",  # ✅ Correct model ID
+            model="openai/gpt-3.5-turbo",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.7
         )
         return response.choices[0].message.content
     except Exception as e:
         return f"❌ Error: {e}"
+
 # Streamlit UI
 st.subheader("🤖 Mixtral AI Assistant")
 question = st.text_input("What do you want to ask Mixtral?")
