@@ -182,11 +182,11 @@ if section == translate("Microeconomics Simulations", "محاكاة الاقتص
         st.plotly_chart(fig)
 
 # Create OpenAI-compatible client for OpenRouter
-client = OpenAI(
+client = openai.OpenAI(
     api_key=api_key,
     base_url="https://openrouter.ai/api/v1",
     default_headers={
-        "HTTP-Referer": "https://datasta.streamlit.app",  # Change to your actual site URL
+        "HTTP-Referer": "https://datasta.streamlit.app",  # replace with your domain
         "X-Title": "Datasta Assistant"
     }
 )
