@@ -3,10 +3,10 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import requests
-import google.generativeai as genai
+import openai
 import os
-api_key = st.secrets.get("GEMINI_API_KEY", "AIzaSyBjwjZeKC1TUExUsmeD_keyY9gJr8G9SZs")
-genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+
+api_key = os.getenv("OPENROUTER_API_KEY") or st.secrets["OPENROUTER_API_KEY"]
 st.set_page_config(page_title="Simulation Center", layout="wide")
 
 # Title
@@ -180,13 +180,32 @@ if section == translate("Microeconomics Simulations", "محاكاة الاقتص
 
         st.plotly_chart(fig)
 
+# Configure OpenRouter as the API base
+openai.api_key = api_key
+openai.api_base = "https://openrouter.ai/api/v1"
 
-# Streamlit App Layout
-st.title("Gemini Model Check")
+# Optional headers for OpenRouter (identify your app, optional)
+openai.organization = "org-datasta"
+openai.headers = {
+    "HTTP-Referer": "https://datasta.streamlit.app",  # Replace with your Streamlit Cloud app URL
+    "X-Title": "Datasta AI Assistant"
+}
 
-models = genai.list_models()
+# Define the assistant function using Gemini model
+def ask_gemini(question):
+    try:
+        response = openai.ChatCompletion.create(
+            model="google/gemini-pro",  # Gemini text model
+            messages=[{"role": "user", "content": question}],
+            temperature=0.7,
+        )
+        return response.choices[0].message["content"]
+    except Exception as e:
+        return f"❌ Error: {str(e)}"
 
-for m in models:
-    st.write(f"Model: {m.name}")
-    st.write(f"Supported methods: {m.supported_generation_methods}")
-    st.markdown("---")
+# Optional demo interface
+st.subheader("🎯 Gemini Assistant")
+user_prompt = st.text_input("Enter your question:")
+if user_prompt:
+    result = ask_gemini(user_prompt)
+    st.markdown(result)
