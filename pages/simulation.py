@@ -180,40 +180,38 @@ if section == translate("Microeconomics Simulations", "محاكاة الاقتص
 
         st.plotly_chart(fig)
 
- Page title
+# Title
 st.title("🧠 AI Economic Assistant (DeepSeek LLM)")
 
-# User API Key input
+# API key input
 api_key = st.text_input("🔑 Enter your Together AI API Key", type="password")
 
-# Input text from user
-prompt = st.text_area("💬 Ask your question:", height=150, placeholder="e.g., What is the effect of inflation on unemployment?")
+# Prompt input
+prompt = st.text_area("💬 Ask your economic question:", height=150, placeholder="e.g., What is the impact of interest rates on inflation?")
 
-# Button to trigger API call
+# Button
 if st.button("Generate Answer"):
-
     if not api_key:
-        st.error("Please enter your Together AI API key.")
+        st.error("❌ Please enter your Together AI API key.")
     elif not prompt.strip():
-        st.error("Please write a question or prompt.")
+        st.error("❌ Please write a question.")
     else:
-        # Set up API call
+        # API call setup
         url = "https://api.together.xyz/v1/chat/completions"
         headers = {
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json"
         }
         payload = {
-            "model": "deepseek-ai/deepseek-llm-7b-chat",
+            "model": "deepseek-ai/deepseek-llm-7b-chat",  # ✅ Free + serverless model
             "messages": [
-                {"role": "system", "content": "You are a helpful and knowledgeable economics assistant."},
+                {"role": "system", "content": "You are a helpful economics assistant."},
                 {"role": "user", "content": prompt}
             ],
             "temperature": 0.7,
             "max_tokens": 1024
         }
 
-        # Call the Together API
         try:
             response = requests.post(url, headers=headers, json=payload)
             if response.status_code == 200:
@@ -222,6 +220,6 @@ if st.button("Generate Answer"):
                 st.markdown("### 🤖 Answer")
                 st.write(answer)
             else:
-                st.error(f"❌ Error {response.status_code} - {response.json()}")
+                st.error(f"❌ HTTP error {response.status_code} - {response.json()}")
         except Exception as e:
-            st.exception(e)
+            st.error(f"❌ Exception: {e}")
