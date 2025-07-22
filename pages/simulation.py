@@ -181,12 +181,13 @@ if section == translate("Microeconomics Simulations", "محاكاة الاقتص
 
         st.plotly_chart(fig)
 
+# Create OpenAI client for OpenRouter
 client = openai.OpenAI(
     api_key=api_key,
     base_url="https://openrouter.ai/api/v1",
     default_headers={
-        "HTTP-Referer": "https://datasta.streamlit.app",  # ✅ customize with your app URL
-        "X-Title": "Datasta AI Assistant"  # optional
+        "HTTP-Referer": "https://datasta.streamlit.app",  # customize with your actual Streamlit app URL
+        "X-Title": "Datasta Gemini Assistant"
     }
 )
 
@@ -194,7 +195,7 @@ client = openai.OpenAI(
 def ask_gemini(question):
     try:
         response = client.chat.completions.create(
-            model="google/gemini-pro",  # ✅ make sure model is correct
+            model="models/google/gemini-pro",  # ✅ correct format
             messages=[
                 {"role": "user", "content": question}
             ],
@@ -203,9 +204,10 @@ def ask_gemini(question):
         return response.choices[0].message.content
     except Exception as e:
         return f"❌ Error: {e}"
+
 # Streamlit UI
-st.subheader("🤖 Gemini Assistant (OpenRouter)")
+st.subheader("🧠 Gemini AI Assistant")
 user_input = st.text_input("Ask your question:")
 if user_input:
-    reply = ask_gemini(user_input)
-    st.markdown(reply)
+    answer = ask_gemini(user_input)
+    st.markdown(answer)
