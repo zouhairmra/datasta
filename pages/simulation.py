@@ -6,6 +6,7 @@ import requests
 import openai
 import os
 
+# Set API key from secrets or env variable
 api_key = os.getenv("OPENROUTER_API_KEY") or st.secrets["OPENROUTER_API_KEY"]
 st.set_page_config(page_title="Simulation Center", layout="wide")
 
@@ -180,32 +181,25 @@ if section == translate("Microeconomics Simulations", "محاكاة الاقتص
 
         st.plotly_chart(fig)
 
-# Configure OpenRouter as the API base
-openai.api_key = api_key
-openai.api_base = "https://openrouter.ai/api/v1"
+client = openai.OpenAI(
+    api_key=api_key,
+    base_url="https://openrouter.ai/api/v1",
+    default_headers={
+        "HTTP-Referer": "https://datasta.streamlit.app",  # ✅ customize with your app URL
+        "X-Title": "Datasta AI Assistant"  # optional
+    }
+)
 
-# Optional headers for OpenRouter (identify your app, optional)
-openai.organization = "org-datasta"
-openai.headers = {
-    "HTTP-Referer": "https://datasta.streamlit.app",  # Replace with your Streamlit Cloud app URL
-    "X-Title": "Datasta AI Assistant"
-}
-
-# Define the assistant function using Gemini model
+# Define Gemini-based assistant
 def ask_gemini(question):
     try:
-        response = openai.ChatCompletion.create(
-            model="google/gemini-pro",  # Gemini text model
-            messages=[{"role": "user", "content": question}],
+        response = client.chat.completions.create(
+            model="google/gemini-pro",  # ✅ make sure model is correct
+            messages=[
+                {"role": "user", "content": question}
+            ],
             temperature=0.7,
         )
-        return response.choices[0].message["content"]
+        return response.choices[0].message.content
     except Exception as e:
-        return f"❌ Error: {str(e)}"
-
-# Optional demo interface
-st.subheader("🎯 Gemini Assistant")
-user_prompt = st.text_input("Enter your question:")
-if user_prompt:
-    result = ask_gemini(user_prompt)
-    st.markdown(result)
+        return f"❌ Error: {e}"
