@@ -2,9 +2,9 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
-import openai
+from openai import OpenAI
 import os
-OPENAI_API_KEY = st.secrets ["OPENAI_API_KEY"]
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 st.set_page_config(page_title="Simulation Center", layout="wide")
 
 # Title
@@ -190,16 +190,16 @@ elif section == translate("AI Assistant", "المساعد الذكي"):
         with st.spinner(translate("Thinking...", "جارٍ التفكير...")):
             try:
                 # OpenAI API call
-                response = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo",  # or "gpt-4" if you have access
-                    messages=[
-                        {"role": "system", "content": "You are an expert assistant in microeconomics and business math."},
-                        {"role": "user", "content": user_question}
-                    ],
-                    temperature=0.7
-                )
+               response = client.chat.completions.create(
+    model="gpt-3.5-turbo",
+    messages=[
+        {"role": "system", "content": "You are an expert assistant in microeconomics and business math."},
+        {"role": "user", "content": user_question}
+    ],
+    temperature=0.7
+)
+assistant_reply = response.choices[0].message.content
 
-                assistant_reply = response["choices"][0]["message"]["content"]
                 st.success(assistant_reply)
 
             except Exception as e:
