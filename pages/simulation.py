@@ -197,13 +197,16 @@ def ask_llama3(prompt, api_key):
         return response.json()["choices"][0]["message"]["content"]
     else:
         raise Exception(f"❌ Error: {response.status_code} - {response.json()}")
-    elif section == translate("AI Assistant", "المساعد الذكي"):
+
+
+# Now outside the function, at top-level in your script:
+if section == translate("AI Assistant", "المساعد الذكي"):
     st.header(translate("AI Assistant", "المساعد الذكي"))
     
     question = st.text_input(translate("Ask the AI assistant", "اطرح سؤالاً على المساعد الذكي"))
     
     # Replace with your actual API key or use st.secrets["TOGETHER_API_KEY"]
-   api_key = st.secrets["TOGETHER_API_KEY"]
+    api_key = st.secrets["TOGETHER_API_KEY"]
     
     if question:
         try:
@@ -212,3 +215,5 @@ def ask_llama3(prompt, api_key):
             st.write(reply)
         except Exception as e:
             st.error(str(e))
+
+   
