@@ -4,6 +4,8 @@ import pandas as pd
 import plotly.graph_objects as go
 from openai import OpenAI
 import os
+import requests
+import json
 st.set_page_config(page_title="Simulation Center", layout="wide")
 
 # Title
@@ -177,32 +179,20 @@ if section == translate("Microeconomics Simulations", "محاكاة الاقتص
 
         st.plotly_chart(fig)
 
-# Initialize OpenAI client once
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-
-# --- AI Assistant Section ---
-if section == translate("AI Assistant", "المساعد الذكي"):
-    st.header(translate("Ask the AI Assistant", "اسأل المساعد الذكي"))
-
-    user_question = st.text_area(
-        translate("Ask any question related to microeconomics or business math.",
-                  "اطرح أي سؤال متعلق بالاقتصاد الجزئي أو الرياضيات للأعمال.")
-    )
-
-    if user_question:
-        with st.spinner(translate("Thinking...", "جارٍ التفكير...")):
-            try:
-                response = client.chat.completions.create(
-                    model="gpt-3.5-turbo",
-                    messages=[
-                        {"role": "system", "content": "You are an expert assistant in microeconomics and business math."},
-                        {"role": "user", "content": user_question}
-                    ],
-                    temperature=0.7
-                )
-                assistant_reply = response.choices[0].message.content
-                st.success(translate(assistant_reply, assistant_reply))
-
-            except Exception as e:
-                st.error("Something went wrong while contacting the AI.")
-                st.exception(e)
+response = requests.post(
+  url="https://openrouter.ai/api/v1/chat/completions",
+  headers={
+    "Authorization": "Bearer <OPENROUTER_API_KEY>",
+    "HTTP-Referer": "<YOUR_SITE_URL>", # Optional. Site URL for rankings on openrouter.ai.
+    "X-Title": "<YOUR_SITE_NAME>", # Optional. Site title for rankings on openrouter.ai.
+  },
+  data=json.dumps({
+    "model": "openai/gpt-4o", # Optional
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the meaning of life?"
+      }
+    ]
+  })
+)
