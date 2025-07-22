@@ -4,6 +4,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import requests
 import openai
+from openai import OpenAI
 import os
 
 # Set API key from secrets or env variable
