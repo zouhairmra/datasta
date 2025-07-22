@@ -206,7 +206,7 @@ if section == translate("AI Assistant", "المساعد الذكي"):
     question = st.text_input(translate("Ask the AI assistant", "اطرح سؤالاً على المساعد الذكي"))
     
     # Replace with your actual API key or use st.secrets["TOGETHER_API_KEY"]
-    api_key = st.secrets["TOGETHER_API_KEY"]
+    api_key = st.secrets["3847d5ca2dcd5ce363968742d0f9c2b42a3bb44c7ef820beef0c3924250072d0"]
     
     if question:
         try:
