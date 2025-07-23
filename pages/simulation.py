@@ -329,7 +329,7 @@ target_lang = st.selectbox(
 if target_lang != "en" and 'answer' in locals():
     try:
         # Use a reliable public instance of LibreTranslate
-        translate_url = "https://translate.argosopentech.com/translate"
+        translate_url = "https://libretranslate.de/translate"
 
         translate_payload = {
             "q": answer,
