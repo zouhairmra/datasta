@@ -6,6 +6,8 @@ seaborn
 scikit-learn>=0.24
 statsmodels
 plotly
+pyperclip
+json
 altair
 requests
 PyYAML
@@ -16,5 +18,5 @@ google-generativeai>=0.4.1
 shap
 sqlalchemy
 joblib
- xgboost
+xgboost
 psycopg2-binary
