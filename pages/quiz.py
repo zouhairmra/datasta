@@ -55,7 +55,7 @@ if st.button("✅ إرسال"):
     # Move to next question
     if st.session_state.current_q + 1 < len(questions):
         st.session_state.current_q += 1
-        st.experimental_rerun()
+        st.rerun()
     else:
         st.balloons()
         st.markdown("### 🏁 انتهى الاختبار")
