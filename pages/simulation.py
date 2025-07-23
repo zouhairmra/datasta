@@ -5,7 +5,9 @@ import plotly.graph_objects as go
 import requests
 import openai
 from openai import OpenAI
+import sys
 import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from components.assistant_block import run_assistant_block
 st.set_page_config(page_title="Simulation Center", layout="wide")
 
