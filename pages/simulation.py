@@ -6,7 +6,6 @@ import requests
 import openai
 from openai import OpenAI
 import os
-from googletrans import Translator
 st.set_page_config(page_title="Simulation Center", layout="wide")
 
 # Title
