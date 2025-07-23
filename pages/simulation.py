@@ -305,7 +305,7 @@ if st.button("Generate Answer"):
                 st.markdown(f"**Q{i+1}:** {entry['question']}")
                 st.markdown(f"**A{i+1}:** {entry['answer']}")
 
-             # --- 🌍 Translate Answer ---
+        # --- 🌍 Translate Answer with model switch ---
         with st.expander("🌍 Translate the Response"):
             st.markdown("#### Choose a target language:")
             col1, col2 = st.columns([3, 1])
@@ -321,10 +321,13 @@ if st.button("Generate Answer"):
                 if not answer:
                     st.warning("❗ Nothing to translate yet. Ask a question first.")
                 else:
-                    translation_instruction = f"Translate the following text to {target_lang}:\n\n{answer}"
+                    # Use a different model just for translation
+                    translation_model = "togethercomputer/llama-2-13b-chat"
+
+                    translation_instruction = f"Please translate the following text to {target_lang}:\n\n{answer}"
 
                     translation_payload = {
-                        "model": selected_model,
+                        "model": translation_model,
                         "messages": [
                             {"role": "user", "content": translation_instruction}
                         ],
@@ -342,3 +345,4 @@ if st.button("Generate Answer"):
                             st.error(f"❌ HTTP {trans_resp.status_code}: {trans_resp.json()}")
                     except Exception as e:
                         st.error(f"❌ Translation error: {e}")
+
