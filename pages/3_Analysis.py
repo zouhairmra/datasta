@@ -1,9 +1,10 @@
 import streamlit as st
-
-
 import streamlit as st
 import statsmodels.api as sm
 import pandas as pd
+# In sidebar or top of app
+language = st.selectbox("🌐 Choose Language", ["English", "Arabic"])
+st.session_state.lang = language
 
 st.title("📉 Econometric Modeling")
 
