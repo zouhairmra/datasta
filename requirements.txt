@@ -4,6 +4,7 @@ numpy
 streamlit-authenticator
 matplotlib
 seaborn
+psycopg2-binary
 scikit-learn>=0.24
 statsmodels
 plotly
