@@ -2,7 +2,7 @@ import streamlit as st
 import bcrypt
 
 st.set_page_config(page_title="DataStatPro", layout="wide")
-
+run_assistant_block()
 # Plain passwords (only for demo; in production use hashed)
 user_passwords = {
     "zmrabet": "pass123",
