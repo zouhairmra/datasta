@@ -305,26 +305,36 @@ if st.button("Generate Answer"):
                 st.markdown(f"**Q{i+1}:** {entry['question']}")
                 st.markdown(f"**A{i+1}:** {entry['answer']}")
 
-        # --- 🌐 Multi-language Answer ---
+                # --- 🌍 Multi-language Answer (Fixed + Improved Design) ---
         with st.expander("🌍 Translate Answer"):
-            target_lang = st.selectbox("Translate answer to:", ["French", "Arabic", "Spanish", "German", "Chinese"])
-            if st.button("🌐 Translate"):
-                translation_prompt = f"Translate this to {target_lang}:\n{answer}"
+            lang_col1, lang_col2 = st.columns([2, 1])
+            with lang_col1:
+                target_lang = st.selectbox(
+                    "🌐 Select language to translate the answer:",
+                    ["French", "Arabic", "Spanish", "German", "Chinese", "Italian", "Portuguese"]
+                )
+            with lang_col2:
+                translate_now = st.button("📤 Translate Now", use_container_width=True)
+
+            if translate_now:
+                translation_prompt = f"Please translate the following response into {target_lang}:\n\n{answer}"
                 translation_payload = {
                     "model": selected_model,
                     "messages": [
+                        {"role": "system", "content": f"You are a translator. Translate the user's message to {target_lang}."},
                         {"role": "user", "content": translation_prompt}
                     ],
-                    "temperature": 0.3,
+                    "temperature": 0.4,
                     "max_tokens": 1024
                 }
+
                 try:
                     trans_resp = requests.post(url, headers=headers, json=translation_payload)
                     if trans_resp.status_code == 200:
-                        translation = trans_resp.json()["choices"][0]["message"]["content"]
-                        st.markdown(f"### 🌍 Translated to {target_lang}")
-                        st.write(translation)
+                        translated = trans_resp.json()["choices"][0]["message"]["content"]
+                        st.markdown(f"### ✅ Translated to {target_lang}")
+                        st.write(translated)
                     else:
-                        st.error("❌ Translation failed.")
+                        st.error(f"❌ HTTP {trans_resp.status_code}: {trans_resp.json()}")
                 except Exception as e:
-                    st.error(f"❌ Error: {e}")
+                    st.error(f"❌ Translation error: {e}")
