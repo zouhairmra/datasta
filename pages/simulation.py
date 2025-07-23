@@ -6,7 +6,7 @@ import requests
 import openai
 from openai import OpenAI
 import os
-from components.assistant_block import run_assistant_block     
+f     
 st.set_page_config(page_title="Simulation Center", layout="wide")
 
 # Title
