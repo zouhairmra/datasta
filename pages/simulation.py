@@ -304,26 +304,38 @@ if st.button("Generate Answer"):
                 st.markdown(f"**Q{i+1}:** {entry['question']}")
                 st.markdown(f"**A{i+1}:** {entry['answer']}")
 
-# Define target language options
-language_options = {
-    "French": "fr",
-    "Spanish": "es",
-    "Arabic": "ar",
-    "German": "de",
-    "Chinese (Simplified)": "zh-cn",
-    "Hindi": "hi"
-}
+# Save AI answer into session_state after successful response
+if resp.status_code == 200:
+    answer = resp.json()["choices"][0]["message"]["content"]
+    st.session_state.answer = answer  # 💾 Store in session_state
+    st.markdown("### 🤖 Answer")
+    st.write(answer)
+# 🌍 Translate the answer only if available
+if "answer" in st.session_state and st.session_state.answer:
+    st.markdown("### 🌍 Translate the Answer")
 
-st.markdown("### 🌍 Translate the Answer")
-selected_language = st.selectbox("Choose target language:", list(language_options.keys()))
-target_lang_code = language_options[selected_language]
+    language_options = {
+        "French": "fr",
+        "Spanish": "es",
+        "Arabic": "ar",
+        "German": "de",
+        "Chinese (Simplified)": "zh-CN",
+        "Hindi": "hi"
+    }
 
-if st.button("🔁 Translate Answer"):
-    if answer:
-        with st.spinner("Translating..."):
-            translated_text = translate_text(answer, target_lang=target_lang_code)
-        st.success("✅ Translated successfully!")
-        st.markdown("### 🌐 Translated Answer")
-        st.write(translated_text)
-    else:
-        st.warning("⚠️ No answer to translate yet.")
+    selected_language = st.selectbox("Choose target language:", list(language_options.keys()))
+    target_lang_code = language_options[selected_language]
+
+    if st.button("🔁 Translate Answer"):
+        try:
+            with st.spinner("Translating..."):
+                from googletrans import Translator
+                translator = Translator()
+                translated = translator.translate(st.session_state.answer, dest=target_lang_code)
+                st.markdown("### 🌐 Translated Answer")
+                st.write(translated.text)
+        except Exception as e:
+            st.error(f"❌ Translation error: {e}")
+else:
+    st.info("💬 Please generate an AI response first to enable translation.")
+
