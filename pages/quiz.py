@@ -1,3 +1,6 @@
+import streamlit as st
+import random
+import pandas as pd
 # RTL support
 st.markdown("<style>body {direction: RTL; text-align: right;}</style>", unsafe_allow_html=True)
 
