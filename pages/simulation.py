@@ -305,8 +305,11 @@ if st.button("Generate Answer"):
                 st.markdown(f"**Q{i+1}:** {entry['question']}")
                 st.markdown(f"**A{i+1}:** {entry['answer']}")
 
-        # --- LANGUAGE TRANSLATION SECTION ---
+ import json
+
+# --- TRANSLATION SECTION ---
 st.markdown("### 🌐 Translate the Answer")
+
 language_names = {
     "fr": "French",
     "es": "Spanish",
@@ -323,25 +326,38 @@ target_lang = st.selectbox(
     index=0
 )
 
-# Only run if translation is requested and answer exists
+# Only try to translate if answer exists
 if target_lang != "en" and 'answer' in locals():
     try:
-        translation_resp = requests.post(
-            "https://libretranslate.de/translate",
-            headers={"Content-Type": "application/json"},
-            json={
-                "q": answer,
-                "source": "en",
-                "target": target_lang,
-                "format": "text"
-            }
-        )
+        # Use a reliable public instance of LibreTranslate
+        translate_url = "https://translate.argosopentech.com/translate"
 
-        if translation_resp.status_code == 200:
-            translated_text = translation_resp.json()["translatedText"]
-            st.markdown("### 🌍 Translated Answer")
-            st.success(translated_text)
+        translate_payload = {
+            "q": answer,
+            "source": "en",
+            "target": target_lang,
+            "format": "text"
+        }
+
+        translate_headers = {
+            "Content-Type": "application/json"
+        }
+
+        response = requests.post(translate_url, headers=translate_headers, json=translate_payload)
+
+        if response.status_code == 200:
+            try:
+                translated_text = response.json()["translatedText"]
+                if translated_text.strip() == "":
+                    st.warning("⚠️ Empty translation received.")
+                else:
+                    st.markdown("### 🌍 Translated Answer")
+                    st.success(translated_text)
+            except json.JSONDecodeError:
+                st.error("⚠️ Could not decode translation response. Server might be down.")
         else:
-            st.warning(f"Translation failed. Code {translation_resp.status_code}")
+            st.error(f"❌ Translation HTTP error {response.status_code}: {response.text}")
+
     except Exception as e:
         st.error(f"Translation error: {e}")
+
