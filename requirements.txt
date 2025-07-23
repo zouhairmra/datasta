@@ -8,6 +8,7 @@ statsmodels
 plotly
 altair
 requests
+deep-translator
 PyYAML
 bcrypt
 openai
