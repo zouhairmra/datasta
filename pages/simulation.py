@@ -217,7 +217,16 @@ if st.button("Generate Answer"):
                 st.error(f"❌ HTTP {resp.status_code}: {resp.json()}")
         except Exception as e:
             st.error(f"❌ Error: {e}")
- # Additional Features Below (do not change original block)
+# Optional: Let the user pick a model from supported options
+        with st.expander("🧠 Model Options"):
+            available_models = [
+                "mistralai/Mistral-7B-Instruct-v0.2",
+                "mistralai/Mixtral-8x7B-Instruct-v0.1",
+                "meta-llama/Llama-2-7b-chat-hf"
+            ]
+            selected_model = st.selectbox("Choose a model", available_models, index=0)
+            payload["model"] = selected_model
+# Additional Features Below (do not change original block)
 
         # Allow user to adjust temperature and max_tokens dynamically
         with st.expander("🔧 Advanced Settings"):
@@ -227,16 +236,7 @@ if st.button("Generate Answer"):
         payload["temperature"] = user_temp
         payload["max_tokens"] = user_max_tokens
 
-        # Optional: Let the user pick a model from supported options
-        with st.expander("🧠 Model Options"):
-            available_models = [
-                "mistralai/Mistral-7B-Instruct-v0.2",
-                "mistralai/Mixtral-8x7B-Instruct-v0.1",
-                "meta-llama/Llama-2-7b-chat-hf"
-            ]
-            selected_model = st.selectbox("Choose a model", available_models, index=0)
-            payload["model"] = selected_model
-
+        
         # Show full JSON request payload for debugging or transparency
         with st.expander("📦 Show Request Payload"):
             st.json(payload)
