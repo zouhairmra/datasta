@@ -305,27 +305,17 @@ if st.button("Generate Answer"):
                 st.markdown(f"**Q{i+1}:** {entry['question']}")
                 st.markdown(f"**A{i+1}:** {entry['answer']}")
 
- 
-# Initialize translator once
-translator = Translator()
+ import requests
 
-# Translation function
-def translate_text(text, target_lang):
-    try:
-        translated = translator.translate(text, dest=target_lang)
-        return translated.text
-    except Exception as e:
-        return f"Translation error: {e}"
+url = "https://google-translator9.p.rapidapi.com/v2/detect"
 
-# UI for selecting translation
-st.markdown("### 🌍 Translate the Answer")
-target_lang = st.selectbox("Choose target language", ["en", "fr", "es", "de", "ar", "zh-cn", "ru"])
+payload = { "q": "Ce mai faci?" }
+headers = {
+	"x-rapidapi-key": "5840895cacmshe15acb6b25c0bdep192a9cjsna764819103c3",
+	"x-rapidapi-host": "google-translator9.p.rapidapi.com",
+	"Content-Type": "application/json"
+}
 
-if st.button("Translate Answer"):
-    if answer:
-        translated = translate_text(answer, target_lang)
-        st.markdown("### 🌐 Translated Answer")
-        st.write(translated)
-    else:
-        st.warning("No answer to translate.")
+response = requests.post(url, json=payload, headers=headers)
 
+print(response.json())
