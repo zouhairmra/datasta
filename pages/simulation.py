@@ -304,33 +304,26 @@ if st.button("Generate Answer"):
                 st.markdown(f"**Q{i+1}:** {entry['question']}")
                 st.markdown(f"**A{i+1}:** {entry['answer']}")
 
-def translate_text(text, target_lang):
-    url = "https://libretranslate1.p.rapidapi.com/translate"
-    headers = {
-        "content-type": "application/x-www-form-urlencoded",
-        "X-RapidAPI-Key": "YOUR_RAPIDAPI_KEY",
-        "X-RapidAPI-Host": "libretranslate1.p.rapidapi.com"
-    }
-    payload = {
-        "q": text,
-        "source": "en",
-        "target": target_lang,
-        "format": "text"
-    }
-answer = ""  # define it before try
+# Define target language options
+language_options = {
+    "French": "fr",
+    "Spanish": "es",
+    "Arabic": "ar",
+    "German": "de",
+    "Chinese (Simplified)": "zh-cn",
+    "Hindi": "hi"
+}
 
-try:
-    resp = requests.post(url, headers=headers, json=payload)
-    if resp.status_code == 200:
-        answer = resp.json()["choices"][0]["message"]["content"]
-        st.markdown("### 🤖 Answer")
-        st.write(answer)
-    else:
-        st.error(f"❌ HTTP {resp.status_code}: {resp.json()}")
-except Exception as e:
-    st.error(f"❌ Error: {e}")
-    if st.button("Translate Answer"):
+st.markdown("### 🌍 Translate the Answer")
+selected_language = st.selectbox("Choose target language:", list(language_options.keys()))
+target_lang_code = language_options[selected_language]
+
+if st.button("🔁 Translate Answer"):
     if answer:
-        translated = translate_text(answer, target_lang)
+        with st.spinner("Translating..."):
+            translated_text = translate_text(answer, target_lang=target_lang_code)
+        st.success("✅ Translated successfully!")
         st.markdown("### 🌐 Translated Answer")
-        st.write(translated)
+        st.write(translated_text)
+    else:
+        st.warning("⚠️ No answer to translate yet.")
