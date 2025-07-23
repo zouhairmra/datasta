@@ -1,76 +1,97 @@
 import streamlit as st
 import random
-import pandas as pd
-# RTL support
-st.markdown("<style>body {direction: RTL; text-align: right;}</style>", unsafe_allow_html=True)
+from db import save_score, load_scores
+import streamlit_authenticator as stauth
+import yaml
+from yaml.loader import SafeLoader
 
-st.title("🧠 اختبار في الاقتصاد والإحصاء")
+# --------------------
+# RTL layout for Arabic
+# --------------------
+st.markdown("""
+    <style>
+        body {direction: RTL; text-align: right;}
+        .block-container {padding: 1rem;}
+    </style>
+""", unsafe_allow_html=True)
 
-# --- Sample Questions
-questions = [
-    {
-        "question": "ما هو الناتج المحلي الإجمالي؟",
-        "options": ["إجمالي الصادرات", "قيمة السلع والخدمات المنتجة محليًا", "الضرائب الحكومية", "الاحتياطي النقدي"],
-        "answer": "قيمة السلع والخدمات المنتجة محليًا"
-    },
-    {
-        "question": "ما هو الانحدار الخطي؟",
-        "options": ["اختبار توزيع", "علاقة بين متغيرين", "مقياس تباين", "مقياس وسط حسابي"],
-        "answer": "علاقة بين متغيرين"
-    },
-    {
-        "question": "أي من التالي يعتبر مؤشرًا للتضخم؟",
-        "options": ["مؤشر أسعار المستهلك", "معدل البطالة", "العرض النقدي", "سعر الفائدة"],
-        "answer": "مؤشر أسعار المستهلك"
-    },
-]
+# --------------------
+# Load Authenticator Config
+# --------------------
+with open("config.yaml") as file:
+    config = yaml.load(file, Loader=SafeLoader)
 
-# Shuffle questions once per session
-if "quiz_data" not in st.session_state:
-    st.session_state.quiz_data = random.sample(questions, len(questions))
-    st.session_state.current_q = 0
-    st.session_state.score = 0
-    st.session_state.answers = []
+authenticator = stauth.Authenticate(
+    config["credentials"], config["cookie"]["name"],
+    config["cookie"]["key"], config["cookie"]["expiry_days"]
+)
 
-# Display current question
-q = st.session_state.quiz_data[st.session_state.current_q]
-st.subheader(f"❓ السؤال {st.session_state.current_q + 1} من {len(questions)}")
-selected = st.radio(q["question"], q["options"], key=f"q{st.session_state.current_q}")
+name, auth_status, username = authenticator.login("Login", "main")
 
-if st.button("✅ إرسال"):
-    is_correct = selected == q["answer"]
-    st.session_state.answers.append({
-        "question": q["question"],
-        "selected": selected,
-        "correct": q["answer"],
-        "is_correct": is_correct
-    })
+if auth_status is False:
+    st.error("اسم المستخدم أو كلمة السر غير صحيحة")
+    st.stop()
+elif auth_status is None:
+    st.warning("الرجاء إدخال اسم المستخدم وكلمة السر")
+    st.stop()
 
-    if is_correct:
-        st.success("✅ إجابة صحيحة!")
-        st.session_state.score += 1
+# --------------------
+# Language Toggle
+# --------------------
+lang = st.radio("اللغة | Language", ["Arabic", "English"], horizontal=True)
+
+def t(ar, en):
+    return ar if lang == "Arabic" else en
+
+st.title(t("📘 صفحة الاختبارات", "📘 Quiz Page"))
+
+# --------------------
+# Difficulty Selection
+# --------------------
+difficulty = st.selectbox(
+    t("اختر مستوى الصعوبة", "Select Difficulty"),
+    ["Easy", "Medium", "Hard"]
+)
+
+# --------------------
+# Randomized Questions
+# --------------------
+questions_easy = [("2+2", "4"), ("5-3", "2")]
+questions_medium = [("10/2", "5"), ("3*4", "12")]
+questions_hard = [("sqrt(16)", "4"), ("log(100,10)", "2")]
+
+questions_pool = {
+    "Easy": questions_easy,
+    "Medium": questions_medium,
+    "Hard": questions_hard
+}
+
+question, correct_answer = random.choice(questions_pool[difficulty])
+user_answer = st.text_input(t("السؤال:", "Question:") + f" {question}")
+
+if st.button(t("إرسال", "Submit")):
+    if user_answer.strip() == correct_answer:
+        st.success(t("إجابة صحيحة ✅", "Correct ✅"))
+        save_score(username, 1, difficulty)
     else:
-        st.error(f"❌ خطأ. الإجابة الصحيحة: {q['answer']}")
+        st.error(t(f"إجابة خاطئة ❌، الصحيح هو: {correct_answer}", f"Incorrect ❌. Correct answer: {correct_answer}"))
+        save_score(username, 0, difficulty)
 
-    # Move to next question
-    if st.session_state.current_q + 1 < len(questions):
-        st.session_state.current_q += 1
-        st.rerun()
-    else:
-        st.balloons()
-        st.markdown("### 🏁 انتهى الاختبار")
-        st.write(f"🎯 النتيجة: {st.session_state.score} من {len(questions)}")
+# --------------------
+# Show Previous Scores
+# --------------------
+if st.checkbox(t("📊 عرض النتائج السابقة", "📊 Show Previous Scores")):
+    scores = load_scores(username)
+    st.dataframe(scores)
 
-        # Show detailed results
-        df_results = pd.DataFrame(st.session_state.answers)
-        st.dataframe(df_results)
-
-        # --- Export
-        if st.download_button("📥 تحميل النتائج بصيغة CSV", df_results.to_csv(index=False), "quiz_results.csv", "text/csv"):
-            st.success("✅ تم التحميل!")
-
-        # Reset button
-        if st.button("🔁 أعد الاختبار"):
-            for key in ["quiz_data", "current_q", "score", "answers"]:
-                st.session_state.pop(key, None)
-            st.experimental_rerun()
+# --------------------
+# Export to CSV
+# --------------------
+if st.button(t("📥 تحميل النتائج كـ CSV", "📥 Export Results as CSV")):
+    scores = load_scores(username)
+    st.download_button(
+        label=t("تحميل", "Download"),
+        data=scores.to_csv(index=False).encode('utf-8-sig'),
+        file_name="scores.csv",
+        mime="text/csv"
+    )
