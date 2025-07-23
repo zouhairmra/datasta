@@ -317,7 +317,18 @@ def translate_text(text, target_lang):
         "target": target_lang,
         "format": "text"
     }
+answer = ""  # define it before try
 
+try:
+    resp = requests.post(url, headers=headers, json=payload)
+    if resp.status_code == 200:
+        answer = resp.json()["choices"][0]["message"]["content"]
+        st.markdown("### 🤖 Answer")
+        st.write(answer)
+    else:
+        st.error(f"❌ HTTP {resp.status_code}: {resp.json()}")
+except Exception as e:
+    st.error(f"❌ Error: {e}")
     try:
         response = requests.post(url, data=payload, headers=headers)
         if response.status_code == 200:
