@@ -6,7 +6,7 @@ import requests
 import openai
 from openai import OpenAI
 import os
- from components.assistant_block import run_assistant_block
+from components.assistant_block import run_assistant_block
 st.set_page_config(page_title="Simulation Center", layout="wide")
 
 # Title
@@ -179,6 +179,4 @@ if section == translate("Microeconomics Simulations", "محاكاة الاقتص
         )
 
         st.plotly_chart(fig)
-
 run_assistant_block()
-
