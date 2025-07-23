@@ -1,0 +1,12 @@
+[theme]
+base="light"
+primaryColor="#0E6BA8"
+backgroundColor="#F9FAFC"
+secondaryBackgroundColor="#F0F2F6"
+textColor="#000000"
+font="sans serif"
+col1, col2 = st.columns([1, 2])
+with col1:
+    st.image("static/logo.png", width=100)
+with col2:
+    st.title("Data Analysis for Students")
