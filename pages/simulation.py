@@ -181,4 +181,5 @@ if section == translate("Microeconomics Simulations", "محاكاة الاقتص
         )
 
         st.plotly_chart(fig)
-run_assistant_block()
+elif section == translate("AI Assistant", "المساعد الذكي"):
+    run_assistant_block()
