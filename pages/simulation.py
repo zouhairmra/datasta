@@ -6,7 +6,6 @@ import requests
 import openai
 from openai import OpenAI
 import os
-from datetime import datetime
 
 st.set_page_config(page_title="Simulation Center", layout="wide")
 
@@ -181,75 +180,39 @@ if section == translate("Microeconomics Simulations", "محاكاة الاقتص
 
         st.plotly_chart(fig)
 
-# Title and Description
-st.title("📊 Economic AI Assistant")
-st.markdown("Ask your economic or data science questions. Powered by Mistral-7B-Instruct.")
+st.title("🧠 AI Economics Assistant (Mistral-7B)")
 
-# Input fields
 api_key = st.text_input("🔑 Enter your Together AI API Key", type="password")
-prompt = st.text_area("💬 What would you like to know?", height=150, placeholder="e.g., Explain the Phillips curve.")
+prompt = st.text_area("💬 Ask a question:", height=150)
 
-# Advanced options
-with st.expander("⚙️ Advanced Options"):
-    temperature = st.slider("Creativity (temperature)", 0.0, 1.0, 0.7)
-    max_tokens = st.slider("Max Tokens", 100, 2048, 1024)
-
-# Save session history
-if "history" not in st.session_state:
-    st.session_state.history = []
-
-# Function to call API
-def get_ai_response(prompt, api_key, temperature=0.7, max_tokens=1024):
-    url = "https://api.together.xyz/v1/chat/completions"
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json"
-    }
-    payload = {
-        "model": "mistralai/Mistral-7B-Instruct-v0.2",
-        "messages": [
-            {"role": "system", "content": "You are an expert economics assistant."},
-            {"role": "user", "content": prompt}
-        ],
-        "temperature": temperature,
-        "max_tokens": max_tokens
-    }
-
-    response = requests.post(url, headers=headers, json=payload)
-    if response.status_code == 200:
-        return response.json()["choices"][0]["message"]["content"]
-    else:
-        raise Exception(f"HTTP {response.status_code}: {response.json()}")
-
-# Submit Button
-if st.button("🧠 Get Answer"):
+if st.button("Generate Answer"):
     if not api_key:
-        st.warning("Please enter your API key.")
+        st.error("❌ Please enter your API key.")
     elif not prompt.strip():
-        st.warning("Prompt cannot be empty.")
+        st.error("❌ Please write a prompt.")
     else:
-        with st.spinner("Thinking... 🤔"):
-            try:
-                answer = get_ai_response(prompt, api_key, temperature, max_tokens)
-                st.success("✅ Answer received!")
-                st.markdown("### 🤖 Answer:")
-                st.markdown(answer)
+        url = "https://api.together.xyz/v1/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "model": "mistralai/Mistral-7B-Instruct-v0.2",  # ✅ Update this with your chosen model
+            "messages": [
+                {"role": "system", "content": "You are an expert in economics."},
+                {"role": "user", "content": prompt}
+            ],
+            "temperature": 0.7,
+            "max_tokens": 1024
+        }
 
-                # Save to history
-                st.session_state.history.append({
-                    "timestamp": datetime.now().isoformat(timespec="seconds"),
-                    "prompt": prompt,
-                    "answer": answer
-                })
-
-               except Exception as e:
-                st.error(f"❌ Error: {e}")
-
-# Show history
-if st.session_state.history:
-    with st.expander("🕘 Previous Questions"):
-        for i, entry in enumerate(reversed(st.session_state.history[-5:]), 1):
-            st.markdown(f"**{i}. {entry['timestamp']}**")
-            st.markdown(f"**You:** {entry['prompt']}")
-            st.markdown(f"**AI:** {entry['answer']}")
-            st.markdown("---")
+        try:
+            resp = requests.post(url, headers=headers, json=payload)
+            if resp.status_code == 200:
+                answer = resp.json()["choices"][0]["message"]["content"]
+                st.markdown("### 🤖 Answer")
+                st.write(answer)
+            else:
+                st.error(f"❌ HTTP {resp.status_code}: {resp.json()}")
+        except Exception as e:
+            st.error(f"❌ Error: {e}")
