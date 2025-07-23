@@ -36,9 +36,26 @@ difficulty = st.selectbox(
 # --------------------
 # Randomized Questions
 # --------------------
-questions_easy = [("2+2", "4"), ("5-3", "2")]
-questions_medium = [("10/2", "5"), ("3*4", "12")]
-questions_hard = [("sqrt(16)", "4"), ("log(100,10)", "2")]
+questions_easy = [
+    ("ما هو الناتج المحلي الإجمالي؟", "إجمالي القيمة المضافة في الاقتصاد"),
+    ("GDP stands for?", "Gross Domestic Product"),
+    ("ما هو قانون الطلب؟", "علاقة عكسية بين السعر والكمية المطلوبة"),
+    ("What does CPI measure?", "Consumer Price Index")
+]
+
+questions_medium = [
+    ("ما هو الانحدار الخطي البسيط؟", "نموذج يربط متغير تابع بمتغير مستقل"),
+    ("What is p-value used for?", "To test statistical significance"),
+    ("ما هي مرونة الطلب السعرية؟", "قياس استجابة الطلب لتغير السعر"),
+    ("OLS stands for?", "Ordinary Least Squares")
+]
+
+questions_hard = [
+    ("في اختبار F، ما هي الفرضية الصفرية؟", "جميع المعاملات تساوي صفر"),
+    ("What does heteroskedasticity imply?", "Non-constant variance of errors"),
+    ("ما الفرق بين التباين والانحراف المعياري؟", "التباين هو مربع الانحراف المعياري"),
+    ("What does R-squared measure?", "Proportion of variance explained")
+]
 
 questions_pool = {
     "Easy": questions_easy,
@@ -46,11 +63,15 @@ questions_pool = {
     "Hard": questions_hard
 }
 
+# Use a default username if none set (for example, guest user)
+if 'username' not in locals() and 'username' not in globals():
+    username = "guest_user"
+
 question, correct_answer = random.choice(questions_pool[difficulty])
 user_answer = st.text_input(t("السؤال:", "Question:") + f" {question}")
 
 if st.button(t("إرسال", "Submit")):
-    if user_answer.strip() == correct_answer:
+    if user_answer.strip().lower() == correct_answer.lower():
         st.success(t("إجابة صحيحة ✅", "Correct ✅"))
         save_score(username, 1, difficulty)
     else:
