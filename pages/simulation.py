@@ -7,16 +7,6 @@ import openai
 from openai import OpenAI
 import os
 
-def translate_text_hf(text, source_lang="en", target_lang="fr", hf_api_token="YOUR_HF_API_TOKEN"):
-    api_url = f"https://api-inference.huggingface.co/models/Helsinki-NLP/opus-mt-{source_lang}-{target_lang}"
-    headers = {"Authorization": f"Bearer {hf_api_token}"}
-    payload = {"inputs": text}
-    response = requests.post(api_url, headers=headers, json=payload)
-    
-    if response.status_code == 200:
-        return response.json()[0]['translation_text']
-    else:
-        return f"Error {response.status_code}: {response.text}"
         
 st.set_page_config(page_title="Simulation Center", layout="wide")
 
