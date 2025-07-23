@@ -252,3 +252,79 @@ if st.button("Generate Answer"):
                     st.error(f"❌ HTTP {resp.status_code}: {resp.json()}")
             except Exception as e:
                 st.error(f"❌ Error: {e}")
+ # --- 📂 File Upload for Context (RAG-style) ---
+        with st.expander("📄 Upload File for Context"):
+            uploaded_file = st.file_uploader("Upload a text/PDF file", type=["txt", "pdf"])
+            if uploaded_file:
+                import PyPDF2
+                if uploaded_file.name.endswith(".pdf"):
+                    reader = PyPDF2.PdfReader(uploaded_file)
+                    file_text = "\n".join([page.extract_text() for page in reader.pages if page.extract_text()])
+                else:
+                    file_text = uploaded_file.read().decode("utf-8")
+                st.success("✅ File uploaded and processed.")
+                st.text_area("📜 Extracted Content", file_text[:1000] + "..." if len(file_text) > 1000 else file_text)
+                payload["messages"].insert(-1, {
+                    "role": "system",
+                    "content": f"Use the following document as context:\n{file_text[:3000]}"
+                })
+
+        # --- 🧠 Answer Summarization ---
+        with st.expander("📝 Summarize Answer"):
+            if st.button("🔍 Summarize the previous answer"):
+                summary_payload = {
+                    "model": selected_model,
+                    "messages": [
+                        {"role": "system", "content": "Summarize the following answer clearly and concisely."},
+                        {"role": "user", "content": answer}
+                    ],
+                    "temperature": 0.3,
+                    "max_tokens": 200
+                }
+                try:
+                    sum_resp = requests.post(url, headers=headers, json=summary_payload)
+                    if sum_resp.status_code == 200:
+                        summary = sum_resp.json()["choices"][0]["message"]["content"]
+                        st.markdown("### ✂️ Summary")
+                        st.write(summary)
+                    else:
+                        st.error("❌ Failed to summarize.")
+                except Exception as e:
+                    st.error(f"❌ Error: {e}")
+
+        # --- 💾 Download Output ---
+        with st.expander("⬇️ Download Answer"):
+            st.download_button("📥 Download Answer as TXT", answer, file_name="ai_answer.txt")
+
+        # --- 💬 Chat History / Memory ---
+        if "chat_history" not in st.session_state:
+            st.session_state.chat_history = []
+        st.session_state.chat_history.append({"question": payload['messages'][-1]['content'], "answer": answer})
+        with st.expander("🕓 Chat History"):
+            for i, entry in enumerate(st.session_state.chat_history):
+                st.markdown(f"**Q{i+1}:** {entry['question']}")
+                st.markdown(f"**A{i+1}:** {entry['answer']}")
+
+        # --- 🌐 Multi-language Answer ---
+        with st.expander("🌍 Translate Answer"):
+            target_lang = st.selectbox("Translate answer to:", ["French", "Arabic", "Spanish", "German", "Chinese"])
+            if st.button("🌐 Translate"):
+                translation_prompt = f"Translate this to {target_lang}:\n{answer}"
+                translation_payload = {
+                    "model": selected_model,
+                    "messages": [
+                        {"role": "user", "content": translation_prompt}
+                    ],
+                    "temperature": 0.3,
+                    "max_tokens": 1024
+                }
+                try:
+                    trans_resp = requests.post(url, headers=headers, json=translation_payload)
+                    if trans_resp.status_code == 200:
+                        translation = trans_resp.json()["choices"][0]["message"]["content"]
+                        st.markdown(f"### 🌍 Translated to {target_lang}")
+                        st.write(translation)
+                    else:
+                        st.error("❌ Translation failed.")
+                except Exception as e:
+                    st.error(f"❌ Error: {e}")
