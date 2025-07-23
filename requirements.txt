@@ -10,6 +10,8 @@ altair
 transformers
 requests
 PyYAML
+import random
+import pandas as pd
 bcrypt
 openai
 wbdata
