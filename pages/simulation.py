@@ -304,15 +304,25 @@ if st.button("Generate Answer"):
                 st.markdown(f"**Q{i+1}:** {entry['question']}")
                 st.markdown(f"**A{i+1}:** {entry['answer']}")
 
-url = "https://google-translator9.p.rapidapi.com/v2/detect"
+def translate_text(text, target_lang):
+    url = "https://libretranslate1.p.rapidapi.com/translate"
+    headers = {
+        "content-type": "application/x-www-form-urlencoded",
+        "X-RapidAPI-Key": "YOUR_RAPIDAPI_KEY",
+        "X-RapidAPI-Host": "libretranslate1.p.rapidapi.com"
+    }
+    payload = {
+        "q": text,
+        "source": "en",
+        "target": target_lang,
+        "format": "text"
+    }
 
-payload = { "q": "Ce mai faci?" }
-headers = {
-	"x-rapidapi-key": "5840895cacmshe15acb6b25c0bdep192a9cjsna764819103c3",
-	"x-rapidapi-host": "google-translator9.p.rapidapi.com",
-	"Content-Type": "application/json"
-}
-
-response = requests.post(url, json=payload, headers=headers)
-
-print(response.json())
+    try:
+        response = requests.post(url, data=payload, headers=headers)
+        if response.status_code == 200:
+            return response.json()["translatedText"]
+        else:
+            return f"Translation API error {response.status_code}: {response.text}"
+    except Exception as e:
+        return f"Translation error: {e}"
