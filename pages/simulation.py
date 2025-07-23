@@ -242,17 +242,7 @@ if st.button("🧠 Get Answer"):
                     "answer": answer
                 })
 
-                # Copy to clipboard
-                if st.button("📋 Copy Answer"):
-                   st.code(answer, language="markdown")
-st.text("Copy manually using Ctrl+C or Cmd+C")
-                    st.info("Answer copied to clipboard!")
-
-                # Download as JSON
-                json_data = json.dumps(st.session_state.history[-1], indent=2)
-                st.download_button("💾 Download Answer (JSON)", data=json_data, file_name="answer.json", mime="application/json")
-
-            except Exception as e:
+               except Exception as e:
                 st.error(f"❌ Error: {e}")
 
 # Show history
