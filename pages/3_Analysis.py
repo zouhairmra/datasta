@@ -5,7 +5,13 @@ import pandas as pd
 # In sidebar or top of app
 language = st.selectbox("🌐 Choose Language", ["English", "Arabic"])
 st.session_state.lang = language
+labels = {
+    "Upload File": {"English": "Upload File", "Arabic": "تحميل الملف"},
+    "AI Answer": {"English": "AI Answer", "Arabic": "إجابة الذكاء الاصطناعي"},
+    # Add more...
+}
 
+st.header(labels["Upload File"][language])
 st.title("📉 Econometric Modeling")
 
 df = st.session_state.get("df")
