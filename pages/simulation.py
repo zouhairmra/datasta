@@ -304,51 +304,44 @@ if st.button("Generate Answer"):
             for i, entry in enumerate(st.session_state.chat_history):
                 st.markdown(f"**Q{i+1}:** {entry['question']}")
                 st.markdown(f"**A{i+1}:** {entry['answer']}")
-        # --- 🌍 Translate using LibreTranslate ---
-        with st.expander("🌍 Translate the Response"):
-            st.markdown("#### Choose a target language:")
-            col1, col2 = st.columns([3, 1])
-            with col1:
-                target_lang = st.selectbox(
-                    "Language",
-                    ["French", "Arabic", "Spanish", "German", "Italian", "Portuguese", "Chinese"],
-                    index=0,
-                    key="translate_lang"
-                )
-            with col2:
-                do_translate = st.button("🔁 Translate", use_container_width=True)
 
-            lang_codes = {
-                "French": "fr",
-                "Arabic": "ar",
-                "Spanish": "es",
-                "German": "de",
-                "Italian": "it",
-                "Portuguese": "pt",
-                "Chinese": "zh"
+        # --- LANGUAGE TRANSLATION SECTION ---
+st.markdown("### 🌐 Translate the Answer")
+language_names = {
+    "fr": "French",
+    "es": "Spanish",
+    "ar": "Arabic",
+    "de": "German",
+    "zh": "Chinese",
+    "en": "English"
+}
+
+target_lang = st.selectbox(
+    "Select target language:",
+    options=list(language_names.keys()),
+    format_func=lambda x: language_names[x],
+    index=0
+)
+
+# Only run if translation is requested and answer exists
+if target_lang != "en" and 'answer' in locals():
+    try:
+        translation_resp = requests.post(
+            "https://libretranslate.de/translate",
+            headers={"Content-Type": "application/json"},
+            json={
+                "q": answer,
+                "source": "en",
+                "target": target_lang,
+                "format": "text"
             }
+        )
 
-            if do_translate:
-                if not answer:
-                    st.warning("❗ Nothing to translate yet. Ask a question first.")
-                else:
-                    try:
-                        trans_resp = requests.post(
-                            "https://libretranslate.de/translate",
-                            headers={"Content-Type": "application/json"},
-                            json={
-                                "q": answer,
-                                "source": "en",
-                                "target": lang_codes[target_lang],
-                                "format": "text"
-                            }
-                        )
-                        if trans_resp.status_code == 200:
-                            translated = trans_resp.json()["translatedText"]
-                            st.success(f"✅ Translated to {target_lang}:")
-                            st.write(translated)
-                        else:
-                            st.error(f"❌ Translation failed: {trans_resp.json()}")
-                    except Exception as e:
-                        st.error(f"❌ Translation error: {e}")
-
+        if translation_resp.status_code == 200:
+            translated_text = translation_resp.json()["translatedText"]
+            st.markdown("### 🌍 Translated Answer")
+            st.success(translated_text)
+        else:
+            st.warning(f"Translation failed. Code {translation_resp.status_code}")
+    except Exception as e:
+        st.error(f"Translation error: {e}")
