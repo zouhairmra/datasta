@@ -6,7 +6,6 @@ import requests
 import openai
 from openai import OpenAI
 import os
-import json
 from datetime import datetime
 
 st.set_page_config(page_title="Simulation Center", layout="wide")
