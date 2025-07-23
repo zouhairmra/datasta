@@ -7,7 +7,7 @@ import openai
 from openai import OpenAI
 import os
 
-        
+      
 st.set_page_config(page_title="Simulation Center", layout="wide")
 
 # Title
@@ -302,36 +302,3 @@ if st.button("Generate Answer"):
             st.session_state.chat_history = []
         st.session_state.chat_history.append({"question": payload['messages'][-1]['content'], "answer": answer})
         with st.expander("🕓 Chat History
-# Assume `answer` is the AI model output you got already
-
-st.markdown("### 🤖 AI Response")
-st.write(answer)
-
-language_options = {
-    "French": "fr",
-    "Spanish": "es",
-    "Arabic": "ar",
-    "German": "de",
-    "Chinese (Simplified)": "zh",
-    "Hindi": "hi"
-}
-
-selected_language = st.selectbox("Choose target language", list(language_options.keys()))
-target_lang_code = language_options[selected_language]
-
-hf_api_token = st.secrets.get("HF_API_TOKEN", "")
-
-if st.button("Translate Answer"):
-    if not hf_api_token:
-        st.error("Hugging Face API token not found. Please add it to your Streamlit secrets.")
-    else:
-        with st.spinner("Translating..."):
-            translated_answer = translate_text_hf(answer, "en", target_lang_code, hf_api_token)
-            st.markdown("### 🌐 Translated Answer")
-            st.write(translated_answer)"):
-            for i, entry in enumerate(st.session_state.chat_history):
-                st.markdown(f"**Q{i+1}:** {entry['question']}")
-                st.markdown(f"**A{i+1}:** {entry['answer']}")
-
-
-
