@@ -216,3 +216,39 @@ if st.button("Generate Answer"):
                 st.error(f"❌ HTTP {resp.status_code}: {resp.json()}")
         except Exception as e:
             st.error(f"❌ Error: {e}")
+ # Additional Features Below (do not change original block)
+
+        # Allow user to adjust temperature and max_tokens dynamically
+        with st.expander("🔧 Advanced Settings"):
+            user_temp = st.slider("Temperature (creativity)", 0.0, 1.0, 0.7, 0.05)
+            user_max_tokens = st.slider("Max tokens (response length)", 256, 4096, 1024, 128)
+
+        payload["temperature"] = user_temp
+        payload["max_tokens"] = user_max_tokens
+
+        # Optional: Let the user pick a model from supported options
+        with st.expander("🧠 Model Options"):
+            available_models = [
+                "mistralai/Mistral-7B-Instruct-v0.2",
+                "mistralai/Mixtral-8x7B-Instruct-v0.1",
+                "meta-llama/Llama-2-7b-chat-hf"
+            ]
+            selected_model = st.selectbox("Choose a model", available_models, index=0)
+            payload["model"] = selected_model
+
+        # Show full JSON request payload for debugging or transparency
+        with st.expander("📦 Show Request Payload"):
+            st.json(payload)
+
+        # Button to re-run the same query
+        if st.button("🔁 Re-run"):
+            try:
+                resp = requests.post(url, headers=headers, json=payload)
+                if resp.status_code == 200:
+                    answer = resp.json()["choices"][0]["message"]["content"]
+                    st.markdown("### 🤖 Answer")
+                    st.write(answer)
+                else:
+                    st.error(f"❌ HTTP {resp.status_code}: {resp.json()}")
+            except Exception as e:
+                st.error(f"❌ Error: {e}")
