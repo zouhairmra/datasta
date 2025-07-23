@@ -305,8 +305,7 @@ if st.button("Generate Answer"):
                 st.markdown(f"**Q{i+1}:** {entry['question']}")
                 st.markdown(f"**A{i+1}:** {entry['answer']}")
 
- import json
-
+ 
 # --- TRANSLATION SECTION ---
 st.markdown("### 🌐 Translate the Answer")
 
