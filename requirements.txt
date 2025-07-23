@@ -6,7 +6,6 @@ seaborn
 scikit-learn>=0.24
 statsmodels
 plotly
-json
 altair
 requests
 PyYAML
