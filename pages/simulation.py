@@ -6,7 +6,6 @@ import requests
 import openai
 from openai import OpenAI
 import os
-import pyperclip
 import json
 from datetime import datetime
 
@@ -246,7 +245,8 @@ if st.button("🧠 Get Answer"):
 
                 # Copy to clipboard
                 if st.button("📋 Copy Answer"):
-                    pyperclip.copy(answer)
+                   st.code(answer, language="markdown")
+st.text("Copy manually using Ctrl+C or Cmd+C")
                     st.info("Answer copied to clipboard!")
 
                 # Download as JSON
