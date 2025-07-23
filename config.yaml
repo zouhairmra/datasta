@@ -1,0 +1,11 @@
+credentials:
+  usernames:
+    zouhair:
+      email: zouhair@example.com
+      name: Zouhair
+      password: '123'  # In production, hash it!
+
+cookie:
+  name: quiz_auth
+  key: secretkey
+  expiry_days: 1
