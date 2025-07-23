@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import requests
+from deep_translator import GoogleTranslator
 import openai
 from openai import OpenAI
 import os
@@ -304,13 +305,7 @@ if st.button("Generate Answer"):
                 st.markdown(f"**Q{i+1}:** {entry['question']}")
                 st.markdown(f"**A{i+1}:** {entry['answer']}")
 
-# Save AI answer into session_state after successful response
-if resp.status_code == 200:
-    answer = resp.json()["choices"][0]["message"]["content"]
-    st.session_state.answer = answer  # 💾 Store in session_state
-    st.markdown("### 🤖 Answer")
-    st.write(answer)
-# 🌍 Translate the answer only if available
+# 🧠 Assume answer was already generated above
 if "answer" in st.session_state and st.session_state.answer:
     st.markdown("### 🌍 Translate the Answer")
 
@@ -329,11 +324,9 @@ if "answer" in st.session_state and st.session_state.answer:
     if st.button("🔁 Translate Answer"):
         try:
             with st.spinner("Translating..."):
-                from googletrans import Translator
-                translator = Translator()
-                translated = translator.translate(st.session_state.answer, dest=target_lang_code)
+                translated_text = GoogleTranslator(source='auto', target=target_lang_code).translate(st.session_state.answer)
                 st.markdown("### 🌐 Translated Answer")
-                st.write(translated.text)
+                st.write(translated_text)
         except Exception as e:
             st.error(f"❌ Translation error: {e}")
 else:
