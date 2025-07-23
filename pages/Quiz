@@ -1,0 +1,37 @@
+# Language selector
+lang = st.radio("🌐 Select Language / اختر اللغة", ["English", "العربية"], horizontal=True)
+is_english = lang == "English"
+
+st.title("🧠 Quiz Time!" if is_english else "🧠 اختبار سريع!")
+
+score = 0
+
+# --- Question 1 ---
+q1 = st.radio(
+    "Q1: What does GDP stand for?" if is_english else "السؤال 1: ماذا تعني GDP؟",
+    options=[
+        "Gross Domestic Product" if is_english else "الناتج المحلي الإجمالي",
+        "General Data Processing" if is_english else "معالجة البيانات العامة",
+        "Global Development Plan" if is_english else "خطة التنمية العالمية"
+    ],
+    key="q1"
+)
+if q1.startswith("Gross") or q1.startswith("الناتج"):
+    score += 1
+
+# --- Question 2 ---
+q2 = st.radio(
+    "Q2: Which of the following is a function of a central bank?" if is_english else "السؤال 2: أي مما يلي هو من وظائف البنك المركزي؟",
+    options=[
+        "Printing money" if is_english else "طباعة النقود",
+        "Running supermarkets" if is_english else "تشغيل محلات السوبرماركت",
+        "Managing tourism" if is_english else "إدارة السياحة"
+    ],
+    key="q2"
+)
+if q2.startswith("Printing") or q2.startswith("طباعة"):
+    score += 1
+
+# --- Submit Button ---
+if st.button("🎯 Submit Quiz" if is_english else "🎯 إرسال الإجابات"):
+    st.success(f"You scored {score}/2 🎉" if is_english else f"لقد حصلت على {score}/2 🎉")
