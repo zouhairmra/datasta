@@ -10,7 +10,6 @@ altair
 transformers
 requests
 PyYAML
-import random
 bcrypt
 openai
 wbdata
