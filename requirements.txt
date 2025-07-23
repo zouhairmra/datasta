@@ -1,7 +1,7 @@
 streamlit
 pandas
 numpy
-streamlit-authenticator
+streamlit-authenticator>=0.2.3
 matplotlib
 seaborn
 psycopg2-binary
