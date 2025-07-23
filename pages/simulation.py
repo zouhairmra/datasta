@@ -6,7 +6,7 @@ import requests
 import openai
 from openai import OpenAI
 import os
-import json
+from googletrans import Translator
 st.set_page_config(page_title="Simulation Center", layout="wide")
 
 # Title
@@ -306,57 +306,26 @@ if st.button("Generate Answer"):
                 st.markdown(f"**A{i+1}:** {entry['answer']}")
 
  
-# --- TRANSLATION SECTION ---
-st.markdown("### 🌐 Translate the Answer")
+# Initialize translator once
+translator = Translator()
 
-language_names = {
-    "fr": "French",
-    "es": "Spanish",
-    "ar": "Arabic",
-    "de": "German",
-    "zh": "Chinese",
-    "en": "English"
-}
-
-target_lang = st.selectbox(
-    "Select target language:",
-    options=list(language_names.keys()),
-    format_func=lambda x: language_names[x],
-    index=0
-)
-
-# Only try to translate if answer exists
-if target_lang != "en" and 'answer' in locals():
+# Translation function
+def translate_text(text, target_lang):
     try:
-        # Use a reliable public instance of LibreTranslate
-        translate_url = "https://libretranslate.de/translate"
-
-        translate_payload = {
-            "q": answer,
-            "source": "en",
-            "target": target_lang,
-            "format": "text"
-        }
-
-        translate_headers = {
-            "Content-Type": "application/json"
-        }
-
-        response = requests.post(translate_url, headers=translate_headers, json=translate_payload)
-
-        if response.status_code == 200:
-            try:
-                translated_text = response.json()["translatedText"]
-                if translated_text.strip() == "":
-                    st.warning("⚠️ Empty translation received.")
-                else:
-                    st.markdown("### 🌍 Translated Answer")
-                    st.success(translated_text)
-            except json.JSONDecodeError:
-                st.error("⚠️ Could not decode translation response. Server might be down.")
-        else:
-            st.error(f"❌ Translation HTTP error {response.status_code}: {response.text}")
-
+        translated = translator.translate(text, dest=target_lang)
+        return translated.text
     except Exception as e:
-        st.error(f"Translation error: {e}")
+        return f"Translation error: {e}"
+
+# UI for selecting translation
+st.markdown("### 🌍 Translate the Answer")
+target_lang = st.selectbox("Choose target language", ["en", "fr", "es", "de", "ar", "zh-cn", "ru"])
+
+if st.button("Translate Answer"):
+    if answer:
+        translated = translate_text(answer, target_lang)
+        st.markdown("### 🌐 Translated Answer")
+        st.write(translated)
+    else:
+        st.warning("No answer to translate.")
 
