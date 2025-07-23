@@ -16,26 +16,6 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --------------------
-# Load Authenticator Config
-# --------------------
-with open("config.yaml") as file:
-    config = yaml.load(file, Loader=SafeLoader)
-
-authenticator = stauth.Authenticate(
-    config["credentials"], config["cookie"]["name"],
-    config["cookie"]["key"], config["cookie"]["expiry_days"]
-)
-
-name, auth_status, username = authenticator.login("Login", location="sidebar")
-
-if auth_status is False:
-    st.error("اسم المستخدم أو كلمة السر غير صحيحة")
-    st.stop()
-elif auth_status is None:
-    st.warning("الرجاء إدخال اسم المستخدم وكلمة السر")
-    st.stop()
-
-# --------------------
 # Language Toggle
 # --------------------
 lang = st.radio("اللغة | Language", ["Arabic", "English"], horizontal=True)
