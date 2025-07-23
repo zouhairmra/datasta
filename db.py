@@ -6,7 +6,7 @@ def get_connection():
     # Replace these values with your real database credentials
     user = "myuser"
     password = ZZMM2026
-    host = "dbhost.example.com"
+    host =  localhost 
     port = 5432
     database = "mydatabase"
     url = f"postgresql://{user}:{password}@{host}:{port}/{database}"
