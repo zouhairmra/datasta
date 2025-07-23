@@ -26,7 +26,7 @@ authenticator = stauth.Authenticate(
     config["cookie"]["key"], config["cookie"]["expiry_days"]
 )
 
-name, auth_status, username = authenticator.login("Login", location="main")
+name, auth_status, username = authenticator.login("Login", location="sidebar")
 
 if auth_status is False:
     st.error("اسم المستخدم أو كلمة السر غير صحيحة")
