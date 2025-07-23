@@ -6,7 +6,6 @@ seaborn
 scikit-learn>=0.24
 statsmodels
 plotly
-pyperclip
 json
 altair
 requests
