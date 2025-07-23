@@ -329,16 +329,7 @@ try:
         st.error(f"❌ HTTP {resp.status_code}: {resp.json()}")
 except Exception as e:
     st.error(f"❌ Error: {e}")
-    try:
-        response = requests.post(url, data=payload, headers=headers)
-        if response.status_code == 200:
-            return response.json()["translatedText"]
-        else:
-            return f"Translation API error {response.status_code}: {response.text}"
-    except Exception as e:
-        return f"Translation error: {e}"
-target_lang = st.selectbox("Choose target language", ["fr", "es", "de", "ar", "zh", "ru"])
-if st.button("Translate Answer"):
+    if st.button("Translate Answer"):
     if answer:
         translated = translate_text(answer, target_lang)
         st.markdown("### 🌐 Translated Answer")
