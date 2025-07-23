@@ -304,45 +304,51 @@ if st.button("Generate Answer"):
             for i, entry in enumerate(st.session_state.chat_history):
                 st.markdown(f"**Q{i+1}:** {entry['question']}")
                 st.markdown(f"**A{i+1}:** {entry['answer']}")
-
-        # --- 🌍 Translate Answer with model switch ---
+        # --- 🌍 Translate using LibreTranslate ---
         with st.expander("🌍 Translate the Response"):
             st.markdown("#### Choose a target language:")
             col1, col2 = st.columns([3, 1])
             with col1:
                 target_lang = st.selectbox(
                     "Language",
-                    ["French", "Arabic", "Spanish", "German", "Chinese", "Italian", "Portuguese"]
+                    ["French", "Arabic", "Spanish", "German", "Italian", "Portuguese", "Chinese"],
+                    index=0,
+                    key="translate_lang"
                 )
             with col2:
                 do_translate = st.button("🔁 Translate", use_container_width=True)
+
+            lang_codes = {
+                "French": "fr",
+                "Arabic": "ar",
+                "Spanish": "es",
+                "German": "de",
+                "Italian": "it",
+                "Portuguese": "pt",
+                "Chinese": "zh"
+            }
 
             if do_translate:
                 if not answer:
                     st.warning("❗ Nothing to translate yet. Ask a question first.")
                 else:
-                    # Use a different model just for translation
-                    translation_model = "togethercomputer/llama-2-13b-chat"
-
-                    translation_instruction = f"Please translate the following text to {target_lang}:\n\n{answer}"
-
-                    translation_payload = {
-                        "model": translation_model,
-                        "messages": [
-                            {"role": "user", "content": translation_instruction}
-                        ],
-                        "temperature": 0.5,
-                        "max_tokens": 1024
-                    }
-
                     try:
-                        trans_resp = requests.post(url, headers=headers, json=translation_payload)
+                        trans_resp = requests.post(
+                            "https://libretranslate.de/translate",
+                            headers={"Content-Type": "application/json"},
+                            json={
+                                "q": answer,
+                                "source": "en",
+                                "target": lang_codes[target_lang],
+                                "format": "text"
+                            }
+                        )
                         if trans_resp.status_code == 200:
-                            translated_text = trans_resp.json()["choices"][0]["message"]["content"]
+                            translated = trans_resp.json()["translatedText"]
                             st.success(f"✅ Translated to {target_lang}:")
-                            st.write(translated_text)
+                            st.write(translated)
                         else:
-                            st.error(f"❌ HTTP {trans_resp.status_code}: {trans_resp.json()}")
+                            st.error(f"❌ Translation failed: {trans_resp.json()}")
                     except Exception as e:
                         st.error(f"❌ Translation error: {e}")
 
