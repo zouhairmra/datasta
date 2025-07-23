@@ -292,13 +292,3 @@ if st.button("Generate Answer"):
                         st.error("❌ Failed to summarize.")
                 except Exception as e:
                     st.error(f"❌ Error: {e}")
-
-        # --- 💾 Download Output ---
-        with st.expander("⬇️ Download Answer"):
-            st.download_button("📥 Download Answer as TXT", answer, file_name="ai_answer.txt")
-
-        # --- 💬 Chat History / Memory ---
-        if "chat_history" not in st.session_state:
-            st.session_state.chat_history = []
-        st.session_state.chat_history.append({"question": payload['messages'][-1]['content'], "answer": answer})
-        with st.expander("🕓 Chat History
