@@ -3,10 +3,21 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import requests
-from deep_translator import GoogleTranslator
 import openai
 from openai import OpenAI
 import os
+
+def translate_text_hf(text, source_lang="en", target_lang="fr", hf_api_token="YOUR_HF_API_TOKEN"):
+    api_url = f"https://api-inference.huggingface.co/models/Helsinki-NLP/opus-mt-{source_lang}-{target_lang}"
+    headers = {"Authorization": f"Bearer {hf_api_token}"}
+    payload = {"inputs": text}
+    response = requests.post(api_url, headers=headers, json=payload)
+    
+    if response.status_code == 200:
+        return response.json()[0]['translation_text']
+    else:
+        return f"Error {response.status_code}: {response.text}"
+        
 st.set_page_config(page_title="Simulation Center", layout="wide")
 
 # Title
@@ -300,35 +311,37 @@ if st.button("Generate Answer"):
         if "chat_history" not in st.session_state:
             st.session_state.chat_history = []
         st.session_state.chat_history.append({"question": payload['messages'][-1]['content'], "answer": answer})
-        with st.expander("🕓 Chat History"):
+        with st.expander("🕓 Chat History
+# Assume `answer` is the AI model output you got already
+
+st.markdown("### 🤖 AI Response")
+st.write(answer)
+
+language_options = {
+    "French": "fr",
+    "Spanish": "es",
+    "Arabic": "ar",
+    "German": "de",
+    "Chinese (Simplified)": "zh",
+    "Hindi": "hi"
+}
+
+selected_language = st.selectbox("Choose target language", list(language_options.keys()))
+target_lang_code = language_options[selected_language]
+
+hf_api_token = st.secrets.get("HF_API_TOKEN", "")
+
+if st.button("Translate Answer"):
+    if not hf_api_token:
+        st.error("Hugging Face API token not found. Please add it to your Streamlit secrets.")
+    else:
+        with st.spinner("Translating..."):
+            translated_answer = translate_text_hf(answer, "en", target_lang_code, hf_api_token)
+            st.markdown("### 🌐 Translated Answer")
+            st.write(translated_answer)"):
             for i, entry in enumerate(st.session_state.chat_history):
                 st.markdown(f"**Q{i+1}:** {entry['question']}")
                 st.markdown(f"**A{i+1}:** {entry['answer']}")
 
-# 🧠 Assume answer was already generated above
-if "answer" in st.session_state and st.session_state.answer:
-    st.markdown("### 🌍 Translate the Answer")
 
-    language_options = {
-        "French": "fr",
-        "Spanish": "es",
-        "Arabic": "ar",
-        "German": "de",
-        "Chinese (Simplified)": "zh-CN",
-        "Hindi": "hi"
-    }
-
-    selected_language = st.selectbox("Choose target language:", list(language_options.keys()))
-    target_lang_code = language_options[selected_language]
-
-    if st.button("🔁 Translate Answer"):
-        try:
-            with st.spinner("Translating..."):
-                translated_text = GoogleTranslator(source='auto', target=target_lang_code).translate(st.session_state.answer)
-                st.markdown("### 🌐 Translated Answer")
-                st.write(translated_text)
-        except Exception as e:
-            st.error(f"❌ Translation error: {e}")
-else:
-    st.info("💬 Please generate an AI response first to enable translation.")
 
