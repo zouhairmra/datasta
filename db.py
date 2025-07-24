@@ -10,17 +10,13 @@ def get_connection():
     port = "5432"
     database = "postgres"
     url = f"postgresql://{user}:{password}@{host}:{port}/{database}"
-    engine = create_engine(url)
-    return engine
-def save_score(username, score, quiz_type):
+    return engine = create_engine(url)
+    
+def save_score(username, score, difficulty):
     engine = get_connection()
-    df = pd.DataFrame([{"username": username, "score": score, "quiz_type": quiz_type}])
-    df.to_sql("quiz_scores", engine, if_exists="append", index=False)
-
-def load_scores(username=None):
-    engine = get_connection()
-    query = "SELECT * FROM quiz_scores"
-    if username:
-        query += f" WHERE username = '{username}'"
-    return pd.read_sql(query, engine)
+    with engine.begin() as connection:
+        connection.execute(
+            "INSERT INTO scores (username, score, difficulty) VALUES (%s, %s, %s)",
+            (username, score, difficulty)
+        )
 
