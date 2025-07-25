@@ -1,6 +1,5 @@
 import streamlit as st
 import random
-from db import save_score, load_scores
 import streamlit_authenticator as stauth
 import yaml
 from yaml.loader import SafeLoader
