@@ -140,8 +140,7 @@ if st.button(t("إرسال", "Submit")):
         save_score(username, 1, difficulty)
     else:
         st.error(t(f"إجابة خاطئة ❌، الصحيح هو: {correct_answer}", f"Incorrect ❌. Correct answer: {correct_answer}"))
-        save_score(username, 0, difficulty)
-
+       
 # --------------------
 # Show Previous Scores
 # --------------------
