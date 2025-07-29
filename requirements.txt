@@ -13,7 +13,7 @@ transformers
 requests
 PyYAML
 bcrypt
-openai
+openai>=1.0.0
 wbdata
 google-generativeai>=0.4.1
 shap
