@@ -1,5 +1,5 @@
 import streamlit as st
-from openai import OpenAI
+import openai
 
 st.set_page_config(page_title="🧠 AI Economics Assistant", layout="centered")
 st.title("🧠 AI Economics Assistant (ChatGPT)")
@@ -30,7 +30,7 @@ if st.button("Generate Answer"):
         st.error("❌ Please write a prompt.")
     else:
         try:
-            openai.api_key = api_key
+           client = openai.OpenAI(api_key=api_key)  
             response = openai.ChatCompletion.create(
                 model=model,
                 messages=[
