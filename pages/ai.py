@@ -5,7 +5,7 @@ st.set_page_config(page_title="🧠 AI Economics Assistant", layout="centered")
 st.title("🧠 AI Economics Assistant (ChatGPT)")
 
 # OpenAI API Key input
-api_key = st.text_input("🔑 Enter your OpenAI API Key", type="password")
+api_key = st.text_input("❌ Error: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************ZPgA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}", type="password")
 
 # Prompt input
 prompt = st.text_area("💬 Ask a question about economics:", height=150)
