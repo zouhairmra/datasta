@@ -1,5 +1,5 @@
 import streamlit as st
-import openai
+from openai import OpenAI
 
 st.set_page_config(page_title="🧠 AI Economics Assistant", layout="centered")
 st.title("🧠 AI Economics Assistant (ChatGPT)")
