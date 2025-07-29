@@ -5,7 +5,7 @@ st.set_page_config(page_title="🧠 AI Economics Assistant", layout="centered")
 st.title("🧠 AI Economics Assistant (ChatGPT)")
 
 # OpenAI API Key input
-api_key = st.text_input("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", type="password")
+api_key = st.text_input("🔑 Enter your OpenAI API Key", type="password")
 
 # Prompt input
 prompt = st.text_area("💬 Ask a question about economics:", height=150)
@@ -30,8 +30,8 @@ if st.button("Generate Answer"):
         st.error("❌ Please write a prompt.")
     else:
         try:
-           openai.api_key = api_key  
-            response = openai.ChatCompletion.create(
+            client = OpenAI(api_key=api_key)
+            response = client.chat.completions.create(
                 model=model,
                 messages=[
                     {"role": "system", "content": "You are an expert in economics."},
@@ -40,9 +40,8 @@ if st.button("Generate Answer"):
                 temperature=temperature,
                 max_tokens=max_tokens
             )
-            answer = response.choices[0].message['content']
+            answer = response.choices[0].message.content
             st.markdown("### 🤖 Answer")
             st.write(answer)
         except Exception as e:
             st.error(f"❌ Error: {e}")
-
