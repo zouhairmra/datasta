@@ -30,7 +30,7 @@ if st.button("Generate Answer"):
         st.error("❌ Please write a prompt.")
     else:
         try:
-           client = openai.OpenAI(api_key=api_key)  
+           openai.api_key = api_key  
             response = openai.ChatCompletion.create(
                 model=model,
                 messages=[
