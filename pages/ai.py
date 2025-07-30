@@ -1,15 +1,21 @@
 from zhipuai import ZhipuAI
 
-client = ZhipuAI(api_key="00d0e718244f4eb4a1c0c1fc85640a11.THXr41nPePMMx9z4")
+client = ZhipuAI(api_key="your-api-key")  # Uses environment variable ZHIPUAI_API_KEY
 response = client.chat.completions.create(
     model="glm-4",
     messages=[
         {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": "Tell me a story about AI."}
+        {"role": "user", "content": "What is artificial intelligence?"}
     ],
-    stream=True
+    tools=[
+        {
+            "type": "web_search",
+            "web_search": {
+                "search_query": "Search the Zhipu",
+                "search_result": True,
+            }
+        }
+    ],
+    extra_body={"temperature": 0.5, "max_tokens": 50}
 )
-
-for chunk in response:
-    if chunk.choices[0].delta.content:
-        print(chunk.choices[0].delta)
+print(response)
