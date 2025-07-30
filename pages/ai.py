@@ -6,28 +6,31 @@ st.title("🧠 AI Economics Assistant (GLM-4.5)")
 
 # API Key input (Zhipu AI key)
 api_key = st.text_input("00d0e718244f4eb4a1c0c1fc85640a11.THXr41nPePMMx9z4:", type="password")
-# Prompt input
-prompt = st.text_area("💬 Ask your economics question:", height=150)
+# Input user prompt
+prompt = st.text_area("💬 Ask your economics question:")
 
-# Optional settings
-with st.expander("⚙️ Model Settings"):
-    model = st.selectbox("Choose model", ["glm-4", "glm-4.5"], index=1)
+# Optional model settings
+with st.expander("⚙️ Advanced Settings"):
     temperature = st.slider("Temperature", 0.1, 1.0, 0.7, 0.05)
-    top_p = st.slider("Top-p (nucleus sampling)", 0.1, 1.0, 0.9, 0.05)
+    top_p = st.slider("Top-p", 0.1, 1.0, 0.95, 0.05)
+    model = st.selectbox("Model", ["glm-4", "glm-4.5"], index=1)
 
-# Submit button
+# Generate answer on button click
 if st.button("🚀 Get Answer"):
     if not api_key:
-        st.error("❌ Please enter your ZhipuAI API key.")
+        st.error("❌ Please provide your ZhipuAI API key.")
     elif not prompt.strip():
-        st.error("❌ Please enter a prompt.")
+        st.error("❌ Please enter a question.")
     else:
         try:
-            # Set API key
+            # Set the API key
             zhipuai.api_key = api_key
 
-            # Send request
-            response = zhipuai.model_api.sse_invoke(
+            # Create a ChatGLM client
+            client = zhipuai.ChatGLM()
+
+            # Send the chat request
+            response = client.chat(
                 model=model,
                 messages=[
                     {"role": "system", "content": "You are an economics assistant."},
@@ -35,7 +38,6 @@ if st.button("🚀 Get Answer"):
                 ],
                 temperature=temperature,
                 top_p=top_p,
-                incremental=False  # set to True if you want streaming tokens
             )
 
             # Display result
