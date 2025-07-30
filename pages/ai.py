@@ -28,7 +28,7 @@ if st.button("Generate Answer"):
     else:
         try:
             zhipuai.api_key = api_key
-            response = zhipuai.ChatCompletion.create(
+            response = zhipuai.model_api.sse_invoke(
                 model=model,
                 messages=[
                     {"role": "system", "content": "You are an expert in economics."},
