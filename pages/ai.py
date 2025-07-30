@@ -1,5 +1,5 @@
 import streamlit as st
-import zhipuai
+from zhipuai import ZhipuAI
 
 st.set_page_config(page_title="🧠 AI Economics Assistant (GLM)", layout="centered")
 st.title("🧠 AI Economics Assistant (GLM-4.5)")
