@@ -1,6 +1,6 @@
 from zhipuai import ZhipuAI
 
-client = ZhipuAI(api_key="your-api-key")  # Uses environment variable ZHIPUAI_API_KEY
+client = ZhipuAI(api_key="00d0e718244f4eb4a1c0c1fc85640a11.THXr41nPePMMx9z4")  # Uses environment variable ZHIPUAI_API_KEY
 response = client.chat.completions.create(
     model="glm-4",
     messages=[
