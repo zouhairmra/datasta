@@ -1,55 +1,33 @@
-import streamlit as st
+import base64
 from zhipuai import ZhipuAI
 
-st.set_page_config(page_title="🧠 AI Economics Assistant (GLM)", layout="centered")
-st.title("🧠 AI Economics Assistant (GLM-4.5)")
+def encode_image(image_path):
+    """Encode image to base64 format"""
+    with open(image_path, "rb") as image_file:
+        return base64.b64encode(image_file.read()).decode('utf-8')
 
-# API Key input (Zhipu AI key)
-api_key = st.text_input("00d0e718244f4eb4a1c0c1fc85640a11.THXr41nPePMMx9z4:", type="password")
-# Input user prompt
-prompt = st.text_area("💬 Ask your economics question:")
+client = ZhipuAI(api_key="your-api-key")
+base64_image = encode_image("path/to/your/image.jpg")
 
-# Optional model settings
-with st.expander("⚙️ Advanced Settings"):
-    temperature = st.slider("Temperature", 0.1, 1.0, 0.7, 0.05)
-    top_p = st.slider("Top-p", 0.1, 1.0, 0.95, 0.05)
-    model = st.selectbox("Model", ["glm-4", "glm-4.5"], index=1)
-
-# Generate answer on button click
-if st.button("🚀 Get Answer"):
-    if not api_key:
-        st.error("❌ Please provide your ZhipuAI API key.")
-    elif not prompt.strip():
-        st.error("❌ Please enter a question.")
-    else:
-        try:
-            # Set the API key
-            zhipuai.api_key = api_key
-
-            # Create chat completion
 response = client.chat.completions.create(
-    model="glm-4",
+    model="glm-4v",
+    extra_body={"temperature": 0.5, "max_tokens": 50},
     messages=[
-        {"role": "user", "content": "Hello, ZhipuAI!"}
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "text",
+                    "text": "What's in this image?"
+                },
+                {
+                    "type": "image_url",
+                    "image_url": {
+                        "url": f"data:image/jpeg;base64,{base64_image}"
+                    }
+                }
+            ]
+        }
     ]
 )
-print(response.choices[0].message.content)
-
-            # Send the chat request
-            response = client.chat(
-                model=model,
-                messages=[
-                    {"role": "system", "content": "You are an economics assistant."},
-                    {"role": "user", "content": prompt}
-                ],
-                temperature=temperature,
-                top_p=top_p,
-            )
-
-            # Display result
-            answer = response['data']['choices'][0]['content']
-            st.markdown("### 🤖 Answer:")
-            st.write(answer)
-
-        except Exception as e:
-            st.error(f"❌ Error: {e}")
+print(response)
