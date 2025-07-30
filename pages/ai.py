@@ -6,7 +6,7 @@ def encode_image(image_path):
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode('utf-8')
 
-client = ZhipuAI(api_key="your-api-key")
+client = ZhipuAI(api_key="00d0e718244f4eb4a1c0c1fc85640a11.THXr41nPePMMx9z4")
 base64_image = encode_image("path/to/your/image.jpg")
 
 response = client.chat.completions.create(
