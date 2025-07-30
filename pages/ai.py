@@ -1,25 +1,15 @@
-import base64
 from zhipuai import ZhipuAI
 
+client = ZhipuAI(api_key="00d0e718244f4eb4a1c0c1fc85640a11.THXr41nPePMMx9z4")
 response = client.chat.completions.create(
-    model="glm-4v",
-    extra_body={"temperature": 0.5, "max_tokens": 50},
+    model="glm-4",
     messages=[
-        {
-            "role": "user",
-            "content": [
-                {
-                    "type": "text",
-                    "text": "What's in this image?"
-                },
-                {
-                    "type": "image_url",
-                    "image_url": {
-                        "url": f"data:image/jpeg;base64,{base64_image}"
-                    }
-                }
-            ]
-        }
-    ]
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Tell me a story about AI."}
+    ],
+    stream=True
 )
-print(response)
+
+for chunk in response:
+    if chunk.choices[0].delta.content:
+        print(chunk.choices[0].delta)
