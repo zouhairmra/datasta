@@ -26,8 +26,14 @@ if st.button("🚀 Get Answer"):
             # Set the API key
             zhipuai.api_key = api_key
 
-            # Create a ChatGLM client
-            client = zhipuai.ChatGLM()
+            # Create chat completion
+response = client.chat.completions.create(
+    model="glm-4",
+    messages=[
+        {"role": "user", "content": "Hello, ZhipuAI!"}
+    ]
+)
+print(response.choices[0].message.content)
 
             # Send the chat request
             response = client.chat(
