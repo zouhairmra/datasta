@@ -5,7 +5,7 @@ st.set_page_config(page_title="🧠 AI Economics Assistant", layout="centered")
 st.title("🧠 AI Economics Assistant (ChatGPT)")
 
 # OpenAI API Key input
-api_key = st.text_input("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", type="password")
+api_key = st.text_input("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", type="password")
 
 # Prompt input
 prompt = st.text_area("💬 Ask a question about economics:", height=150)
