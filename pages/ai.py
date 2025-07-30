@@ -5,7 +5,7 @@ st.set_page_config(page_title="🧠 AI Economics Assistant (GLM)", layout="cente
 st.title("🧠 AI Economics Assistant (GLM-4.5)")
 
 # API Key input (Zhipu AI key)
-api_key = st.text_input("Enter your Zhipu AI API Key:", type="password")
+api_key = st.text_input("00d0e718244f4eb4a1c0c1fc85640a11.THXr41nPePMMx9z4:", type="password")
 
 # Prompt input
 prompt = st.text_area("💬 Ask a question about economics:", height=150)
