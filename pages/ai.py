@@ -1,11 +1,10 @@
 import streamlit as st
 from zhipuai import ZhipuAI
-
 st.set_page_config(page_title="🧠 AI Economics Assistant (GLM-4.5)", layout="centered")
 st.title("🧠 AI Economics Assistant (GLM-4.5)")
 
 # API Key input
-api_key = st.text_input("🔑 Enter your ZhipuAI API Key:", type="password")
+api_key = st.text_input("00d0e718244f4eb4a1c0c1fc85640a11.THXr41nPePMMx9z4:", type="password")
 # Initialize or load chat history (system + past user + assistant messages)
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = [
@@ -63,7 +62,6 @@ if st.button("Generate Answer"):
                 if hasattr(delta, "content") and delta.content:
                     answer_text += delta.content
                     answer_container.markdown(answer_text)
-
             # Append assistant's answer to chat history
             st.session_state.chat_history.append({"role": "assistant", "content": answer_text})
 
