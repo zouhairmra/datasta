@@ -1,5 +1,5 @@
 streamlit==1.39.0
-zhipuai==1.0.7
+zhipuai
 pandas
 numpy
 streamlit-authenticator>=0.2.3
