@@ -1,71 +1,76 @@
 import streamlit as st
-from zhipuai import ZhipuAI
+from gpt4all import GPT4All
 
-st.set_page_config(page_title="🧠 AI Economics Assistant (GLM-4.5)", layout="centered")
-st.title("🧠 AI Economics Assistant (GLM-4.5)")
+# -------------------------------------------------
+# 1️⃣ PAGE SETUP
+# -------------------------------------------------
+st.set_page_config(page_title="🧠 Local AI Economics Assistant", layout="centered")
+st.title("🧠 Local AI Economics Assistant")
 
-# API Key input
-api_key = st.text_input("00d0e718244f4eb4a1c0c1fc85640a11.THXr41nPePMMx9z4:", type="password")
-# Initialize or load chat history (system + past user + assistant messages)
+# -------------------------------------------------
+# 2️⃣ MODEL CONFIGURATION
+# -------------------------------------------------
+with st.expander("🧠 Model Options"):
+    model_path = st.text_input(
+        "Enter the path to your local model (.gguf):",
+        value="models/phi-3-mini-4k-instruct.Q4_0.gguf"
+    )
+    model_name = model_path.split("/")[-1]
+    st.write(f"🔍 Using model: **{model_name}**")
+
+with st.expander("🔧 Advanced Settings"):
+    temperature = st.slider("Temperature (creativity)", 0.0, 1.0, 0.7, 0.05)
+    max_tokens = st.slider("Max tokens (response length)", 64, 1024, 512, 64)
+
+# -------------------------------------------------
+# 3️⃣ CHAT HISTORY
+# -------------------------------------------------
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = [
         {"role": "system", "content": "You are an expert in economics."}
     ]
 
-# Display chat history
-for msg in st.session_state.chat_history[1:]:  # skip system message from display
+for msg in st.session_state.chat_history[1:]:
     if msg["role"] == "user":
         st.markdown(f"🧑 **You:** {msg['content']}")
     else:
         st.markdown(f"🤖 **Assistant:** {msg['content']}")
 
-# Prompt input
+# -------------------------------------------------
+# 4️⃣ USER INPUT
+# -------------------------------------------------
 user_input = st.text_area("💬 Your question:", height=150)
 
-# Optional settings
-with st.expander("🧠 Model Options"):
-    model = st.selectbox(
-        "Choose a model",
-        ["glm-4", "glm-4f", "glm-4b"],  # example GLM models
-        index=0
-    )
-
-with st.expander("🔧 Advanced Settings"):
-    temperature = st.slider("Temperature (creativity)", 0.0, 1.0, 0.7, 0.05)
-    max_tokens = st.slider("Max tokens (response length)", 256, 4096, 1024, 128)
-
+# -------------------------------------------------
+# 5️⃣ GENERATE ANSWER
+# -------------------------------------------------
 if st.button("Generate Answer"):
-    if not api_key:
-        st.error("❌ Please enter your ZhipuAI API key.")
-    elif not user_input.strip():
-        st.error("❌ Please write a prompt.")
+    if not user_input.strip():
+        st.error("❌ Please enter a question.")
     else:
         try:
-            client = ZhipuAI(api_key=api_key)
+            # Load local model
+            model = GPT4All(model_name=model_path)
 
-            # Add user input to chat history
+            # Add user input
             st.session_state.chat_history.append({"role": "user", "content": user_input.strip()})
 
-            # Send entire chat history for context
-            response = client.chat.completions.create(
-                model=model,
-                messages=st.session_state.chat_history,
-                temperature=temperature,
-                max_tokens=max_tokens,
-                stream=True,
-            )
+            # Build the conversation as prompt
+            prompt = "\n".join(
+                [f"{msg['role'].capitalize()}: {msg['content']}" for msg in st.session_state.chat_history]
+            ) + "\nAssistant:"
 
-            # Stream response and build assistant's message
-            answer_container = st.empty()
-            answer_text = ""
-            for chunk in response:
-                delta = chunk.choices[0].delta
-                if hasattr(delta, "content") and delta.content:
-                    answer_text += delta.content
-                    answer_container.markdown(answer_text)
+            # Generate local model response
+            with model.chat_session():
+                response = model.generate(
+                    prompt,
+                    temp=temperature,
+                    max_tokens=max_tokens
+                )
 
-            # Append assistant's answer to chat history
-            st.session_state.chat_history.append({"role": "assistant", "content": answer_text})
+            # Show and store answer
+            st.markdown(f"🤖 **Assistant:** {response}")
+            st.session_state.chat_history.append({"role": "assistant", "content": response})
 
         except Exception as e:
             st.error(f"❌ Error: {e}")
