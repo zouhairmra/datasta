@@ -1,8 +1,7 @@
-streamlit
+streamlit==1.39.0
+zhipuai==1.0.7
 pandas
 numpy
-llama_cpp 
-zhipuai
 streamlit-authenticator>=0.2.3
 matplotlib
 seaborn
