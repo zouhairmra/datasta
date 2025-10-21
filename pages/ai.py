@@ -1,26 +1,25 @@
 import streamlit as st
-from gpt4all import GPT4All
+from llama_cpp import Llama
 
 # -------------------------------------------------
 # 1️⃣ PAGE SETUP
 # -------------------------------------------------
-st.set_page_config(page_title="🧠 Local AI Economics Assistant", layout="centered")
-st.title("🧠 Local AI Economics Assistant")
+st.set_page_config(page_title="🧠 Local LLaMA Economics Assistant", layout="centered")
+st.title("🦙 Local LLaMA Economics Assistant")
 
 # -------------------------------------------------
 # 2️⃣ MODEL CONFIGURATION
 # -------------------------------------------------
 with st.expander("🧠 Model Options"):
     model_path = st.text_input(
-        "Enter the path to your local model (.gguf):",
-        value="models/phi-3-mini-4k-instruct.Q4_0.gguf"
+        "Enter path to your LLaMA model (.gguf):",
+        value="models/phi-3-mini-4k-instruct.Q4_0.gguf"  # change to your model path
     )
-    model_name = model_path.split("/")[-1]
-    st.write(f"🔍 Using model: **{model_name}**")
+    st.write(f"🔍 Using model: **{model_path.split('/')[-1]}**")
 
 with st.expander("🔧 Advanced Settings"):
     temperature = st.slider("Temperature (creativity)", 0.0, 1.0, 0.7, 0.05)
-    max_tokens = st.slider("Max tokens (response length)", 64, 1024, 512, 64)
+    max_tokens = st.slider("Max tokens (response length)", 64, 2048, 512, 64)
 
 # -------------------------------------------------
 # 3️⃣ CHAT HISTORY
@@ -49,26 +48,35 @@ if st.button("Generate Answer"):
         st.error("❌ Please enter a question.")
     else:
         try:
-            # Load local model
-            model = GPT4All(model_name=model_path)
+            # Load LLaMA model
+            st.write("⏳ Loading local model... (first time may take a few seconds)")
+            llm = Llama(
+                model_path=model_path,
+                n_ctx=4096,
+                n_threads=4,  # adjust based on your CPU
+                verbose=False
+            )
 
-            # Add user input
+            # Add user message
             st.session_state.chat_history.append({"role": "user", "content": user_input.strip()})
 
-            # Build the conversation as prompt
-            prompt = "\n".join(
-                [f"{msg['role'].capitalize()}: {msg['content']}" for msg in st.session_state.chat_history]
+            # Build conversation prompt
+            messages = "\n".join(
+                [f"{m['role'].capitalize()}: {m['content']}" for m in st.session_state.chat_history]
             ) + "\nAssistant:"
 
-            # Generate local model response
-            with model.chat_session():
-                response = model.generate(
-                    prompt,
-                    temp=temperature,
-                    max_tokens=max_tokens
-                )
+            # Generate response
+            st.write("🤖 Generating response...")
+            output = llm(
+                messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                stop=["User:", "Assistant:"]
+            )
 
-            # Show and store answer
+            response = output["choices"][0]["text"].strip()
+
+            # Display and store
             st.markdown(f"🤖 **Assistant:** {response}")
             st.session_state.chat_history.append({"role": "assistant", "content": response})
 
