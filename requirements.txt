@@ -1,6 +1,7 @@
 streamlit
 pandas
 numpy
+llama_cpp 
 zhipuai
 streamlit-authenticator>=0.2.3
 matplotlib
