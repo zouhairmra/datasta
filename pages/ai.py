@@ -1,18 +1,20 @@
 import streamlit as st
 from zhipuai import ZhipuAI
+
 st.set_page_config(page_title="🧠 AI Economics Assistant (GLM-4.5)", layout="centered")
 st.title("🧠 AI Economics Assistant (GLM-4.5)")
 
 # API Key input
-api_key = st.text_input("00d0e718244f4eb4a1c0c1fc85640a11.THXr41nPePMMx9z4:", type="password")
-# Initialize or load chat history (system + past user + assistant messages)
+api_key = st.text_input("Enter your ZhipuAI API key:", type="password")
+
+# Initialize or load chat history
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = [
         {"role": "system", "content": "You are an expert in economics."}
     ]
 
 # Display chat history
-for msg in st.session_state.chat_history[1:]:  # skip system message from display
+for msg in st.session_state.chat_history[1:]:  # skip system message
     if msg["role"] == "user":
         st.markdown(f"🧑 **You:** {msg['content']}")
     else:
@@ -25,7 +27,7 @@ user_input = st.text_area("💬 Your question:", height=150)
 with st.expander("🧠 Model Options"):
     model = st.selectbox(
         "Choose a model",
-        ["glm-4", "glm-4f", "glm-4b"],  # example GLM models
+        ["glm-4", "glm-4f", "glm-4b"],
         index=0
     )
 
@@ -45,16 +47,16 @@ if st.button("Generate Answer"):
             # Add user input to chat history
             st.session_state.chat_history.append({"role": "user", "content": user_input.strip()})
 
-            # Send entire chat history for context
+            # Send chat history to ZhipuAI
             response = client.chat.completions.create(
                 model=model,
                 messages=st.session_state.chat_history,
                 temperature=temperature,
                 max_tokens=max_tokens,
-                stream=True,
+                stream=True  # for streaming responses
             )
 
-            # Stream response and build assistant's message
+            # Stream response
             answer_container = st.empty()
             answer_text = ""
             for chunk in response:
@@ -62,7 +64,8 @@ if st.button("Generate Answer"):
                 if hasattr(delta, "content") and delta.content:
                     answer_text += delta.content
                     answer_container.markdown(answer_text)
-            # Append assistant's answer to chat history
+
+            # Save assistant response
             st.session_state.chat_history.append({"role": "assistant", "content": answer_text})
 
         except Exception as e:
