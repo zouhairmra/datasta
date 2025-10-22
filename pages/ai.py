@@ -5,7 +5,7 @@ st.set_page_config(page_title="🧠 AI Economics Assistant (GLM-4.5)", layout="c
 st.title("🧠 AI Economics Assistant (GLM-4.5)")
 
 # API Key input
-api_key = st.text_input("Enter your ZhipuAI API key:", type="password")
+api_key = st.text_input("af323011bfb84e9588262117c594c339.ltAjuvZibUD0IAXs", type="password")
 
 # Initialize or load chat history
 if "chat_history" not in st.session_state:
