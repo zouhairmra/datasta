@@ -7,8 +7,6 @@ import openai
 from openai import OpenAI
 import sys
 import os
-st.set_page_config(page_title="🧠 AI Economics Assistant", layout="centered")
-st.title("🧠 AI Economics Assistant (Mistral-7B)")
 # Add project root folder (adjust if needed)
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
  
