@@ -183,7 +183,7 @@ if section == translate("Microeconomics Simulations", "محاكاة الاقتص
 
         st.plotly_chart(fig)
 # 🔐 API Key Input
-api_key = st.text_input("🔑 Enter your Together AI API Key", type="password")
+api_key = st.text_input("dj8CydRNQBWj4LMHq5VTFk7PyYWxh1hb", type="password")
 
 # 📥 Prompt Input
 prompt = st.text_area("💬 Ask a question in economics:", height=150)
