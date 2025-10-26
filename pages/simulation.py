@@ -48,12 +48,15 @@ if "course_filename" not in st.session_state:
 # FILE UPLOAD (shared single area)
 # ==========================
 st.markdown("### 📂 Upload a file for AI analysis or course FAQ")
-uploaded_file = st.file_uploader("Upload PDF, CSV, DOCX, or TXT (one file at a time)", type=["pdf", "csv", "docx", "txt"], accept_multiple_files=False)
+uploaded_file = st.file_uploader(
+    "Upload PDF, CSV, DOCX, or TXT (one file at a time)", 
+    type=["pdf", "csv", "docx", "txt"], 
+    accept_multiple_files=False
+)
 uploaded_text = ""
 df = None
 
 def safe_read_csv(uploaded_file_obj):
-    # handle different encodings and return a DataFrame or raise
     try:
         uploaded_file_obj.seek(0)
         return pd.read_csv(uploaded_file_obj, encoding="utf-8-sig")
@@ -75,28 +78,27 @@ if uploaded_file:
             try:
                 uploaded_file.seek(0)
                 reader = PdfReader(uploaded_file)
-                text_pages = []
-                for p in reader.pages:
-                    text_pages.append(p.extract_text() or "")
+                text_pages = [p.extract_text() or "" for p in reader.pages]
                 uploaded_text = "\n\n".join(text_pages)
                 st.success("✅ PDF text extracted.")
             except Exception as e:
                 st.error(f"❌ PDF extraction failed: {e}")
         else:
-            st.error("PyPDF2 not installed; cannot extract PDF text. Consider installing PyPDF2 or upload a TXT/DOCX.")
+            st.error("PyPDF2 not installed; cannot extract PDF text. Please upload TXT or CSV instead.")
 
-    # Word
-# Word
-elif file_ext == "docx":
-    if Document:
-        try:
-            doc = Document(uploaded_file)
-            uploaded_text = "\n".join([p.text for p in doc.paragraphs])
-            st.success("✅ Word text extracted.")
-        except Exception as e:
-            st.error(f"⚠️ Failed to read DOCX: {e}")
-    else:
-        st.warning("⚠️ python-docx not installed. Please upload PDF or TXT instead.")
+    # DOCX
+    elif file_ext == "docx":
+        if Document:
+            try:
+                uploaded_file.seek(0)
+                doc = Document(uploaded_file)
+                uploaded_text = "\n".join([p.text for p in doc.paragraphs])
+                st.success("✅ Word text extracted.")
+            except Exception as e:
+                st.error(f"⚠️ Failed to read DOCX: {e}")
+        else:
+            st.warning("⚠️ python-docx not installed. Please upload PDF, TXT, or CSV instead.")
+
     # TXT
     elif file_ext == "txt":
         try:
@@ -119,14 +121,19 @@ elif file_ext == "docx":
             df = None
             uploaded_text = ""
 
+    else:
+        st.warning("⚠️ Unsupported file type. Please upload PDF, DOCX, TXT, or CSV.")
+
     # Save the extracted text to session_state for FAQ use
     if uploaded_text:
         st.session_state["course_text"] = uploaded_text
         st.session_state["course_filename"] = uploaded_file.name
 
     with st.expander("📜 Preview Extracted Text"):
-        st.text((uploaded_text or st.session_state.get("course_text", ""))[:2000] + ("..." if len((uploaded_text or st.session_state.get("course_text", ""))) > 2000 else ""))
-
+        st.text(
+            (uploaded_text or st.session_state.get("course_text", ""))[:2000] + 
+            ("..." if len((uploaded_text or st.session_state.get("course_text", ""))) > 2000 else "")
+        )
 # ==========================
 # DATA ANALYSIS TOOLS (original behavior kept)
 # ==========================
