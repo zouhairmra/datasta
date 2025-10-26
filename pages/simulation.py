@@ -8,16 +8,16 @@ import io
 from pathlib import Path
 
 # Optional imports for PDF/DOCX parsing
+# Try importing PDF and DOCX libraries
 try:
     from PyPDF2 import PdfReader
-except Exception:
+except ImportError:
     PdfReader = None
 
 try:
     from docx import Document
-except Exception:
+except ImportError:
     Document = None
-
 # ==========================
 # PAGE SETUP
 # ==========================
@@ -86,18 +86,17 @@ if uploaded_file:
             st.error("PyPDF2 not installed; cannot extract PDF text. Consider installing PyPDF2 or upload a TXT/DOCX.")
 
     # Word
-    elif file_ext == "docx":
-        if Document:
-            try:
-                uploaded_file.seek(0)
-                doc = Document(uploaded_file)
-                uploaded_text = "\n".join([p.text for p in doc.paragraphs])
-                st.success("✅ Word text extracted.")
-            except Exception as e:
-                st.error(f"❌ DOCX extraction failed: {e}")
-        else:
-            st.error("python-docx not installed; cannot extract DOCX text. Consider installing python-docx or upload a TXT/PDF.")
-
+# Word
+elif file_ext == "docx":
+    if Document:
+        try:
+            doc = Document(uploaded_file)
+            uploaded_text = "\n".join([p.text for p in doc.paragraphs])
+            st.success("✅ Word text extracted.")
+        except Exception as e:
+            st.error(f"⚠️ Failed to read DOCX: {e}")
+    else:
+        st.warning("⚠️ python-docx not installed. Please upload PDF or TXT instead.")
     # TXT
     elif file_ext == "txt":
         try:
