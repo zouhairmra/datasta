@@ -175,10 +175,10 @@ if df is not None:
 # ==========================
 # COURSE FAQ CHATBOT SECTION (Integrated, always visible)
 # ==========================
-st.markdown("---")
+st.write("---")
 st.header("📚 Course FAQ Chatbot (Lightweight, Upload-based)")
 
-st.markdown("""
+st.write("""
 This FAQ bot answers questions using **ONLY** the text you upload above (syllabus, assignment sheets, policies).  
 It does **not** use external knowledge. If the answer is not present in the uploaded document, the bot will reply:
 **"I don't know — please ask the instructor."**
@@ -282,7 +282,7 @@ def faq_answer(question: str):
 
 # FAQ UI controls (always visible as you requested)
 if faq_enable:
-    st.markdown("**Course FAQ Mode:** Enabled — answers will be drawn only from the uploaded course document.")
+    st.write("**Course FAQ Mode:** Enabled — answers will be drawn only from the uploaded course document.")
     faq_question = st.text_input("Ask the course (FAQ bot):", placeholder="e.g., When is Assignment 2 due?", key="faq_q")
     if st.button("Ask FAQ bot"):
         if not faq_question.strip():
@@ -290,7 +290,7 @@ if faq_enable:
         else:
             with st.spinner("Searching uploaded document..."):
                 answer = faq_answer(faq_question)
-                st.markdown("**FAQ Bot answer:**")
+                st.write("**FAQ Bot answer:**")
                 # detect language for display preferences
                 if likely_arabic(faq_question) or "Principles of Microeconomics" in course_choice:
                     st.write(answer)
@@ -306,7 +306,7 @@ st.header("💬 General AI Chat (POE API)")
 # display chat history
 for msg in st.session_state["messages"]:
     with st.chat_message(msg["role"]):
-        st.markdown(msg["content"])
+        st.write(msg["content"])
 
 default_prompt = "Summarize the uploaded document." if st.session_state.get("course_text","") else ""
 user_input = st.chat_input("Type your question or ask about your uploaded file...") or default_prompt
@@ -314,7 +314,7 @@ user_input = st.chat_input("Type your question or ask about your uploaded file..
 if user_input:
     st.session_state["messages"].append({"role": "user", "content": user_input})
     with st.chat_message("user"):
-        st.markdown(user_input)
+        st.write(user_input)
 
     with st.chat_message("assistant"):
         placeholder = st.empty()
