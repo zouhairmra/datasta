@@ -5,39 +5,6 @@ import time
 import pandas as pd
 
 # ==========================
-# OPTIONAL LIBRARIES
-# ==========================
-try:
-    from PyPDF2 import PdfReader
-except ImportError:
-    PdfReader = None
-    st.warning("⚠️ PyPDF2 not found. PDF upload disabled.")
-
-try:
-    from docx import Document
-except ImportError:
-    Document = None
-    st.warning("⚠️ python-docx not found. Word file upload disabled.")
-
-try:
-    import matplotlib.pyplot as plt
-except ImportError:
-    plt = None
-    st.warning("⚠️ matplotlib not found. Plotting disabled.")
-
-try:
-    import seaborn as sns
-except ImportError:
-    sns = None
-    st.warning("⚠️ seaborn not found. Advanced plotting disabled.")
-
-try:
-    import statsmodels.api as sm
-except ImportError:
-    sm = None
-    st.warning("⚠️ statsmodels not found. Regression analysis unavailable.")
-
-# ==========================
 # PAGE SETUP
 # ==========================
 st.set_page_config(page_title="AI Assistant", page_icon="🤖", layout="wide")
