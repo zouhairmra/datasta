@@ -1,6 +1,8 @@
 streamlit==1.39.0
 zhipuai
 pandas
+PyPDF2
+python-docx
 numpy
 streamlit-authenticator>=0.2.3
 matplotlib
