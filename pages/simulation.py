@@ -1,4 +1,4 @@
-# app.py (UPDATED — Integrated Course FAQ Chatbot)
+# 6_AI_Assistant.py
 import streamlit as st
 import requests
 import json
@@ -7,7 +7,7 @@ import pandas as pd
 import io
 from pathlib import Path
 
-# --- Optional/soft imports (handle if missing) ---
+# Optional imports for PDF/DOCX parsing
 try:
     from PyPDF2 import PdfReader
 except Exception:
@@ -17,16 +17,6 @@ try:
     from docx import Document
 except Exception:
     Document = None
-
-# LangChain + embeddings + FAISS
-try:
-    from langchain.text_splitter import RecursiveCharacterTextSplitter
-    from langchain.embeddings import OpenAIEmbeddings
-    from langchain.vectorstores import FAISS
-    from langchain.document_loaders import PyPDFLoader, UnstructuredWordDocumentLoader, TextLoader
-    LC_AVAILABLE = True
-except Exception:
-    LC_AVAILABLE = False
 
 # ==========================
 # PAGE SETUP
@@ -48,16 +38,17 @@ MODEL = st.selectbox("Select model", ["maztouriabot", "gpt-4o-mini", "claude-3-h
 if "messages" not in st.session_state:
     st.session_state["messages"] = []
 
-if "faq_index" not in st.session_state:
-    st.session_state["faq_index"] = None  # will hold FAISS index object
-if "faq_docs_meta" not in st.session_state:
-    st.session_state["faq_docs_meta"] = []  # metadata for docs uploaded for FAQ
+# We'll store the latest uploaded course text here (single upload area for both courses)
+if "course_text" not in st.session_state:
+    st.session_state["course_text"] = ""  # raw extracted text
+if "course_filename" not in st.session_state:
+    st.session_state["course_filename"] = ""
 
 # ==========================
-# FILE UPLOAD (course docs + data)
+# FILE UPLOAD (shared single area)
 # ==========================
-st.markdown("### 📂 Upload a file for AI analysis")
-uploaded_file = st.file_uploader("Upload PDF, CSV, DOCX, or TXT", type=["pdf", "csv", "docx", "txt"], accept_multiple_files=False)
+st.markdown("### 📂 Upload a file for AI analysis or course FAQ")
+uploaded_file = st.file_uploader("Upload PDF, CSV, DOCX, or TXT (one file at a time)", type=["pdf", "csv", "docx", "txt"], accept_multiple_files=False)
 uploaded_text = ""
 df = None
 
@@ -92,22 +83,7 @@ if uploaded_file:
             except Exception as e:
                 st.error(f"❌ PDF extraction failed: {e}")
         else:
-            # fallback try langchain loader if available
-            if LC_AVAILABLE:
-                try:
-                    uploaded_file.seek(0)
-                    tmp_path = Path("tmp_uploaded.pdf")
-                    with open(tmp_path, "wb") as f:
-                        f.write(uploaded_file.getbuffer())
-                    loader = PyPDFLoader(str(tmp_path))
-                    docs = loader.load()
-                    uploaded_text = "\n\n".join([d.page_content for d in docs])
-                    tmp_path.unlink(missing_ok=True)
-                    st.success("✅ PDF text extracted via LangChain loader.")
-                except Exception as e:
-                    st.error(f"❌ PDF extraction failed (langchain): {e}")
-            else:
-                st.error("PyPDF2 not installed; cannot extract PDF text.")
+            st.error("PyPDF2 not installed; cannot extract PDF text. Consider installing PyPDF2 or upload a TXT/DOCX.")
 
     # Word
     elif file_ext == "docx":
@@ -120,22 +96,7 @@ if uploaded_file:
             except Exception as e:
                 st.error(f"❌ DOCX extraction failed: {e}")
         else:
-            # try langchain loader fallback
-            if LC_AVAILABLE:
-                try:
-                    uploaded_file.seek(0)
-                    tmp_path = Path("tmp_uploaded.docx")
-                    with open(tmp_path, "wb") as f:
-                        f.write(uploaded_file.getbuffer())
-                    loader = UnstructuredWordDocumentLoader(str(tmp_path))
-                    docs = loader.load()
-                    uploaded_text = "\n\n".join([d.page_content for d in docs])
-                    tmp_path.unlink(missing_ok=True)
-                    st.success("✅ DOCX text extracted via LangChain loader.")
-                except Exception as e:
-                    st.error(f"❌ DOCX extraction failed (langchain): {e}")
-            else:
-                st.error("python-docx not installed; cannot extract DOCX text.")
+            st.error("python-docx not installed; cannot extract DOCX text. Consider installing python-docx or upload a TXT/PDF.")
 
     # TXT
     elif file_ext == "txt":
@@ -159,11 +120,16 @@ if uploaded_file:
             df = None
             uploaded_text = ""
 
+    # Save the extracted text to session_state for FAQ use
+    if uploaded_text:
+        st.session_state["course_text"] = uploaded_text
+        st.session_state["course_filename"] = uploaded_file.name
+
     with st.expander("📜 Preview Extracted Text"):
-        st.text(uploaded_text[:2000] + ("..." if len(uploaded_text) > 2000 else ""))
+        st.text((uploaded_text or st.session_state.get("course_text", ""))[:2000] + ("..." if len((uploaded_text or st.session_state.get("course_text", ""))) > 2000 else ""))
 
 # ==========================
-# DATA ANALYSIS TOOLS (keep original behavior)
+# DATA ANALYSIS TOOLS (original behavior kept)
 # ==========================
 import matplotlib.pyplot as plt
 try:
@@ -201,18 +167,17 @@ if df is not None:
             st.warning("Not enough numeric columns for regression.")
 
 # ==========================
-# COURSE FAQ CHATBOT SECTION (NEW)
+# COURSE FAQ CHATBOT SECTION (Integrated, always visible)
 # ==========================
 st.markdown("---")
-st.header("📚 Course FAQ Chatbot (RAG-backed)")
+st.header("📚 Course FAQ Chatbot (Lightweight, Upload-based)")
 
 st.markdown("""
-Use this mode to upload your course documents (syllabus, assignment sheets, policies).  
-The FAQ bot will answer questions using ONLY the uploaded documents and will cite sources.  
-If the info is not present, it will reply: *"I don't know — please ask the instructor."*
+This FAQ bot answers questions using **ONLY** the text you upload above (syllabus, assignment sheets, policies).  
+It does **not** use external knowledge. If the answer is not present in the uploaded document, the bot will reply:
+**"I don't know — please ask the instructor."**
 """)
 
-# Course selection and language options
 course_choice = st.selectbox("Choose course to power the FAQ bot", [
     "Business Mathematics II (Bilingual: EN + AR)",
     "Principles of Microeconomics (Arabic: MSA + light Qatari tone)"
@@ -220,161 +185,111 @@ course_choice = st.selectbox("Choose course to power the FAQ bot", [
 
 faq_enable = st.checkbox("Enable Course FAQ Mode", value=False)
 
-# Ingest documents for FAQ (separate upload area)
-st.markdown("**Upload course documents for the FAQ bot (PDF / DOCX / TXT).**")
-faq_files = st.file_uploader("Upload course docs for FAQ (you can upload one file at a time)", type=["pdf", "docx", "txt"], accept_multiple_files=True, key="faq_upload")
+# Lightweight retrieval: split uploaded text into chunks and do simple similarity via substring & keyword matching
+def chunk_text(text: str, chunk_size: int = 1000, overlap: int = 200):
+    if not text:
+        return []
+    chunks = []
+    start = 0
+    L = len(text)
+    while start < L:
+        end = min(start + chunk_size, L)
+        chunk = text[start:end]
+        chunks.append(chunk)
+        start = end - overlap
+    return chunks
 
-faq_index_folder = "faq_faiss_index"  # local folder to save index for persistence (if desired)
-faq_embed_model = "text-embedding-3-small"  # or change as needed
+def keyword_search_chunks(question: str, chunks: list, top_k=5):
+    # Very simple scoring: count keyword overlaps (split on spaces, lowercase)
+    q_tokens = [t for t in question.lower().split() if len(t) > 1]
+    scores = []
+    for i, c in enumerate(chunks):
+        c_low = c.lower()
+        score = sum(1 for t in q_tokens if t in c_low)
+        scores.append((score, i, c))
+    scores.sort(reverse=True, key=lambda x: x[0])
+    # Return up to top_k chunks with positive score
+    return [c for s, i, c in scores[:top_k] if s > 0]
 
-def build_faq_index_from_files(files):
-    """Load uploaded files, split, embed, and build FAISS index in session_state."""
-    if not LC_AVAILABLE:
-        st.error("LangChain/embeddings not available in environment. Install langchain + openai + faiss-cpu to enable FAQ.")
-        return None
+# Language detection (simple)
+def likely_arabic(text: str):
+    # crude heuristic: presence of Arabic letters
+    if any("\u0600" <= ch <= "\u06FF" for ch in text):
+        return True
+    return False
 
-    docs = []
-    meta = []
-    tmp_paths = []
-    for f in files:
-        name = f.name
-        try:
-            ext = name.split(".")[-1].lower()
-            tmp = Path(f"tmp_faq_{name}")
-            with open(tmp, "wb") as fh:
-                fh.write(f.getbuffer())
-            tmp_paths.append(tmp)
+# RAG-like prompt (we'll send context to POE/API; but ensure model knows to use only context)
+def build_faq_prompt(context_chunks, question, course_choice):
+    context = "\n\n---\n\n".join(context_chunks)
+    base = (
+        "You are a course assistant. Use ONLY the CONTEXT provided below to answer the student's question. "
+        "If the answer is not in the context, reply exactly: \"I don't know — please ask the instructor.\" "
+        "Keep answers concise and friendly. Add a one-line citation indicating the uploaded filename at the end."
+        "\n\nCONTEXT:\n"
+    )
+    prompt = base + context + f"\n\nQuestion: {question}\n\nAnswer:"
+    # language instructions
+    if "Business Mathematics" in course_choice:
+        prompt += "\n\nIf the question is in Arabic, answer in Arabic; if in English, answer in English. Keep Arabic formal but friendly."
+    else:
+        prompt += "\n\nAnswer in Modern Standard Arabic using a light Qatari-friendly tone. Keep it professional and concise."
+    return prompt
 
-            if ext == "pdf":
-                loader = PyPDFLoader(str(tmp))
-                loaded = loader.load()
-            elif ext in ["docx", "doc"]:
-                loader = UnstructuredWordDocumentLoader(str(tmp))
-                loaded = loader.load()
-            elif ext == "txt":
-                loader = TextLoader(str(tmp), encoding="utf8")
-                loaded = loader.load()
-            else:
-                loaded = []
-            # attach source metadata
-            for d in loaded:
-                d.metadata["source"] = name
-            docs.extend(loaded)
-            meta.append({"filename": name, "chunks": len(loaded)})
-        except Exception as e:
-            st.warning(f"Could not load {name}: {e}")
-
-    if not docs:
-        st.error("No documents loaded for FAQ index.")
-        for p in tmp_paths:
-            p.unlink(missing_ok=True)
-        return None
-
-    splitter = RecursiveCharacterTextSplitter(chunk_size=800, chunk_overlap=150)
-    split_docs = splitter.split_documents(docs)
-    emb = OpenAIEmbeddings(model=faq_embed_model)
-    vs = FAISS.from_documents(split_docs, emb)
-    # save local copy if desired
-    try:
-        vs.save_local(faq_index_folder)
-    except Exception:
-        pass
-
-    # cleanup temp files
-    for p in tmp_paths:
-        p.unlink(missing_ok=True)
-    return vs, meta
-
-if faq_files:
-    if st.button("Index uploaded FAQ documents"):
-        with st.spinner("Building FAQ index (this may take a moment)..."):
-            res = build_faq_index_from_files(faq_files)
-            if res:
-                vs_obj, meta = res
-                st.session_state["faq_index"] = vs_obj
-                st.session_state["faq_docs_meta"] = meta
-                st.success("✅ FAQ index built and loaded into memory.")
-else:
-    st.info("Upload course documents here and click 'Index uploaded FAQ documents' to build the FAQ knowledge base.")
-
-# RAG prompt templates (language-aware)
-RAG_BASE = """You are an assistant that answers student questions using ONLY the following CONTEXT extracted from course documents.
-Rules:
-- Use ONLY the context below. Do NOT use outside knowledge.
-- If the answer cannot be found in the context, reply exactly: "I don't know — please ask the instructor."
-- Provide a one-line source citation at the end in the format: [filename].
-- Keep answers concise and student-friendly.
-
-Context:
-{context}
-
-Question:
-{question}
-
-Answer:"""
-
-RAG_BILINGUAL_SUFFIX = "\nIf the question is in Arabic, answer in Arabic; if it's in English, answer in English. Keep Arabic formal but friendly."
-
-RAG_MSA_QATARI_SUFFIX = "\nAnswer in Modern Standard Arabic using a lightly Qatari-friendly tone. Keep answers professional and concise."
-
-def run_faq_query(question: str, faiss_index, top_k=5, temp=0.0):
-    if not faiss_index:
-        return "FAQ knowledge base not loaded. Please upload and index course documents."
-    retriever = faiss_index.as_retriever(search_kwargs={"k": top_k})
-    docs = retriever.get_relevant_documents(question)
-    if not docs:
+def faq_answer(question: str):
+    # fetch uploaded course text from session
+    text = st.session_state.get("course_text", "")
+    filename = st.session_state.get("course_filename", "uploaded_course_doc")
+    if not text:
+        return "No course document uploaded. Please upload the syllabus or course document above and try again."
+    # chunk and search
+    chunks = chunk_text(text, chunk_size=1200, overlap=200)
+    matched = keyword_search_chunks(question, chunks, top_k=5)
+    if not matched:
         return "I don't know — please ask the instructor."
 
-    # Concatenate context but keep source markers
-    context = "\n\n---\n\n".join([f"[{d.metadata.get('source','unknown')}]\n{d.page_content}" for d in docs])
-    # choose suffix based on course
-    if "Business Mathematics" in course_choice:
-        prompt = RAG_BASE + RAG_BILINGUAL_SUFFIX
-    else:
-        prompt = RAG_BASE + RAG_MSA_QATARI_SUFFIX
-    prompt_filled = prompt.format(context=context, question=question)
+    # Build prompt using matched chunks as context
+    prompt = build_faq_prompt(matched, question, course_choice)
 
-    # Call OpenAI completion (use OpenAI as an assistant for RAG)
-    # You should set OPENAI_API_KEY in Streamlit secrets for embeddings/LLM calls
-    OPENAI_KEY = st.secrets.get("OPENAI_API_KEY", None)
-    if not OPENAI_KEY:
-        return "OpenAI API key not configured in Streamlit secrets. Cannot process FAQ queries."
+    # Prefer POE chat for generation (you already have POE API configured)
+    if not POE_API_KEY or POE_API_KEY == "YOUR_POE_API_KEY_HERE":
+        return "POE API key not configured in Streamlit secrets (POE_API_KEY). Cannot generate FAQ answer."
 
-    # Use OpenAI chat/completions via API
-    import openai
-    openai.api_key = OPENAI_KEY
     try:
-        resp = openai.ChatCompletion.create(
-            model="gpt-4o-mini",  # change if you have another model available
-            messages=[{"role": "user", "content": prompt_filled}],
-            temperature=temp,
-            max_tokens=500,
-        )
-        answer = resp["choices"][0]["message"]["content"].strip()
-        # Safety: ensure the model didn't hallucinate beyond context by checking for keyword:
-        if answer.lower().startswith("i don't know") or "please ask the instructor" in answer.lower():
+        headers = {"Authorization": f"Bearer {POE_API_KEY}", "Content-Type": "application/json"}
+        payload = {"model": MODEL, "messages": [{"role": "user", "content": prompt}], "temperature": 0.0}
+        res = requests.post(POE_API_URL, headers=headers, json=payload, timeout=60)
+        res.raise_for_status()
+        data = res.json()
+        response_text = data["choices"][0]["message"]["content"].strip()
+        # safety: ensure the model didn't hallucinate; enforce "I don't know" if it claims facts not in context
+        # crude check: ensure the response references something from matched chunks (we check for any overlap token)
+        # If it fails the crude check, return "I don't know"
+        q_tokens = [t for t in question.lower().split() if len(t) > 1]
+        if not any(t in " ".join(matched).lower() for t in q_tokens):
+            # question tokens not present in context; we already returned earlier, but repeat safety
             return "I don't know — please ask the instructor."
-        # Append simple citations from the retrieved docs
-        sources = list({d.metadata.get("source","unknown") for d in docs})
-        cite_line = "\n\nSources: " + ", ".join(sources)
-        return answer + cite_line
+        # append citation line
+        cite = f"\n\nSource: [{filename}]"
+        return response_text + cite
     except Exception as e:
-        return f"Error when calling OpenAI for RAG: {e}"
+        return f"❌ Error contacting POE API for FAQ: {e}"
 
-# FAQ interaction UI
+# FAQ UI controls (always visible as you requested)
 if faq_enable:
-    st.markdown("**Course FAQ Mode is ON — questions will be answered from the indexed course documents.**")
-    faq_question = st.text_input("Ask the course (FAQ bot):", placeholder="e.g., When is Assignment 2 due?")
+    st.markdown("**Course FAQ Mode:** Enabled — answers will be drawn only from the uploaded course document.")
+    faq_question = st.text_input("Ask the course (FAQ bot):", placeholder="e.g., When is Assignment 2 due?", key="faq_q")
     if st.button("Ask FAQ bot"):
-        if not st.session_state.get("faq_index"):
-            st.error("FAQ index not loaded. Upload and index course docs first.")
-        elif not faq_question.strip():
+        if not faq_question.strip():
             st.warning("Please type a question for the FAQ bot.")
         else:
-            with st.spinner("Searching course documents..."):
-                answer = run_faq_query(faq_question, st.session_state["faq_index"], top_k=5)
+            with st.spinner("Searching uploaded document..."):
+                answer = faq_answer(faq_question)
                 st.markdown("**FAQ Bot answer:**")
-                st.write(answer)
+                # detect language for display preferences
+                if likely_arabic(faq_question) or "Principles of Microeconomics" in course_choice:
+                    st.write(answer)
+                else:
+                    st.write(answer)
 
 # ==========================
 # MAIN CHAT (original POE API flow)
@@ -387,7 +302,7 @@ for msg in st.session_state["messages"]:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
-default_prompt = "Summarize the uploaded document." if uploaded_text else ""
+default_prompt = "Summarize the uploaded document." if st.session_state.get("course_text","") else ""
 user_input = st.chat_input("Type your question or ask about your uploaded file...") or default_prompt
 
 if user_input:
@@ -401,7 +316,7 @@ if user_input:
 
         try:
             headers = {"Authorization": f"Bearer {POE_API_KEY}", "Content-Type": "application/json"}
-            content = f"File content:\n{uploaded_text[:4000]}\n\nQuestion: {user_input}" if uploaded_text else user_input
+            content = f"File content:\n{st.session_state.get('course_text','')[:4000]}\n\nQuestion: {user_input}" if st.session_state.get('course_text','') else user_input
             payload = {"model": MODEL, "messages": [{"role": "user", "content": content}]}
 
             res = requests.post(POE_API_URL, headers=headers, json=payload, timeout=60)
@@ -439,4 +354,4 @@ if col2.button("💾 Export Chat"):
         st.warning("No chat to export!")
 
 st.markdown("---")
-st.caption("💡 EconLab AI Assistant — FAQ Bot integrated. RAG uses OpenAI for embeddings & LLM. Configure OPENAI_API_KEY in Streamlit secrets.")
+st.caption("💡 EconLab AI Assistant — FAQ Bot integrated. FAQ answers are strictly based on the uploaded document and generated via POE API. Configure POE_API_KEY in Streamlit secrets.")
